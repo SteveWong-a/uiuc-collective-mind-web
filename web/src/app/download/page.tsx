@@ -254,7 +254,7 @@ export default function DownloadPage() {
 
               {/* Instructions Content */}
               {activeTab === "mac" ? (
-                <div className="bg-[var(--color-paper)] border border-[var(--color-rule)] p-4 text-[13px] leading-relaxed space-y-2">
+                <div className="bg-[var(--color-paper)] border border-[var(--color-rule)] p-4 text-[13px] leading-relaxed space-y-3">
                   <div className="flex gap-2">
                     <span className="font-[700] text-[var(--color-ink)]">1.</span>
                     <span>Open the downloaded <code>.dmg</code> file and drag <strong>UIUC Collective Mind</strong> into your <strong>Applications</strong> folder.</span>
@@ -268,11 +268,25 @@ export default function DownloadPage() {
                   <div className="flex gap-2">
                     <span className="font-[700] text-[var(--color-ink)]">3.</span>
                     <span>
-                      Click <strong>Open</strong> in the confirmation box. (Or visit <em>System Settings &gt; Privacy &amp; Security</em> and click <strong>&quot;Open Anyway&quot;</strong>).
+                      Click <strong>Open</strong> in the confirmation dialog (or visit <em>System Settings &gt; Privacy &amp; Security</em> and click <strong>&quot;Open Anyway&quot;</strong>).
                     </span>
                   </div>
-                  <div className="text-[12px] text-[var(--color-muted)] mt-2 pt-2 border-t border-[var(--color-rule)]">
-                    * You only need to do this step the very first time you launch the app.
+
+                  {/* Troubleshooting for Damaged / Trash message */}
+                  <div className="mt-3 pt-3 border-t border-[var(--color-rule)] bg-[var(--color-wash)] p-3 border">
+                    <div className="font-[700] text-[var(--color-ink)] text-[12px] uppercase tracking-wider font-mono mb-1">
+                      If macOS says &quot;App is damaged and can&apos;t be opened&quot;:
+                    </div>
+                    <p className="text-[12px] text-[var(--color-muted)] m-0 mb-2">
+                      On macOS Sequoia and Sonoma, Apple Gatekeeper attaches a quarantine attribute (<code>com.apple.quarantine</code>) to open-source apps downloaded outside the App Store. Run this single command in <strong>Terminal</strong> to clear it:
+                    </p>
+                    <div className="bg-[var(--color-paper)] border border-[var(--color-rule)] p-2 font-mono text-[12px] select-all overflow-x-auto text-[var(--color-ink)]">
+                      xattr -cr &quot;/Applications/UIUC Collective Mind.app&quot;
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-[var(--color-muted)] pt-1">
+                    * You only need to do this once when first installing or updating.
                   </div>
                 </div>
               ) : (
