@@ -537,28 +537,28 @@ export default function Dashboard() {
     <>
       {/* Guest Mode Sticky Banner */}
       {isGuest && (
-        <div className="bg-[var(--color-ink)] text-[var(--color-paper)] px-4 sm:px-8 py-2.5 text-[13px] flex flex-col sm:flex-row items-center justify-between gap-2 border-b-[1.5px] border-[var(--color-ink)] sticky top-0 z-50">
+        <div className="bg-[var(--color-wash)] text-[var(--color-ink)] px-4 sm:px-8 py-2 text-[12px] flex flex-col sm:flex-row items-center justify-between gap-2 border-b border-[var(--color-rule)] sticky top-0 z-50">
           <div className="flex items-center gap-2">
-            <span className="bg-[var(--color-green)] text-white text-[10px] font-[800] uppercase px-1.5 py-0.5 tracking-wider">
-              Demo Mode
+            <span className="font-mono uppercase text-[10px] font-[700] tracking-wider px-1.5 py-0.5 border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-muted)]">
+              Guest Preview
             </span>
-            <span>
-              You are exploring as a <strong>Guest</strong> with sample UIUC coursework.
+            <span className="text-[var(--color-muted)]">
+              Viewing sample UIUC coursework.
             </span>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setLoginOpen(true)}
-              className="font-[700] text-[var(--color-paper)] underline hover:text-white cursor-pointer bg-transparent border-0 text-[13px] p-0"
+              className="font-[600] text-[var(--color-ink)] hover:underline cursor-pointer bg-transparent border-0 text-[12px] p-0"
             >
-              Sign in with Google to sync real courses →
+              Sign in with Google to sync live courses →
             </button>
-            <span className="opacity-40">|</span>
+            <span className="text-[var(--color-rule)]">|</span>
             <button
               onClick={exitGuest}
-              className="text-[12px] opacity-80 hover:opacity-100 cursor-pointer bg-transparent border-0 text-[var(--color-paper)]"
+              className="text-[12px] text-[var(--color-muted)] hover:text-[var(--color-ink)] cursor-pointer bg-transparent border-0"
             >
-              Exit Demo
+              Exit Preview
             </button>
           </div>
         </div>
@@ -566,43 +566,40 @@ export default function Dashboard() {
 
       {/* Header */}
       <header
-        className="flex items-baseline gap-4 px-7 pb-[14px] flex-wrap bg-[rgba(255,255,255,0.95)] sticky top-0 z-10"
+        className="flex items-baseline gap-4 px-7 pb-[14px] flex-wrap bg-[rgba(255,255,255,0.96)] sticky top-0 z-10"
         style={{
-          borderBottom: "1.5px solid var(--color-ink)",
-          backdropFilter: "blur(4px)",
-          paddingTop: "44px",
-          marginTop: "-22px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
+          borderBottom: "1px solid var(--color-rule)",
+          backdropFilter: "blur(6px)",
+          paddingTop: isGuest ? "16px" : "44px",
+          marginTop: isGuest ? "0" : "-22px",
         }}
       >
-        <h1 className="m-0 text-[20px] font-[800] tracking-tight">UIUC Collective Mind</h1>
-        <span className="text-[var(--color-muted)]">
-          {user?.displayName ? `Hi, ${user.displayName.split(" ")[0]}` : isGuest ? "Guest Explorer (Demo)" : "Connected"}
+        <h1 className="m-0 text-[19px] font-[800] tracking-tight">UIUC Collective Mind</h1>
+        <span className="text-[var(--color-muted)] text-[14px]">
+          {user?.displayName ? `Hi, ${user.displayName.split(" ")[0]}` : isGuest ? "Guest Preview" : "Connected"}
         </span>
         <span className="flex-1" />
         <div className="flex gap-2 items-center flex-wrap">
           <a
             href="/download"
-            className="flex items-center gap-1.5 text-[var(--color-ink)] bg-[var(--color-wash)] border-[1.5px] border-[var(--color-ink)] py-[6px] px-[14px] cursor-pointer transition-all duration-200 text-[15px] font-[500] hover:bg-[var(--color-paper)] hover:translate-x-[-1px] hover:translate-y-[-1px]"
-            style={{ boxShadow: "2px 2px 0 rgba(0,0,0,0.1)" }}
+            className="flex items-center gap-1.5 text-[var(--color-ink)] bg-[var(--color-wash)] border border-[var(--color-rule)] py-[5px] px-[12px] cursor-pointer transition-colors text-[14px] font-[500] hover:border-[var(--color-ink)] hover:bg-[var(--color-paper)]"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            Desktop App
+            Desktop
           </a>
           <button
             onClick={() => setOnboardingOpen(true)}
-            className="text-[var(--color-paper)] bg-[var(--color-ink)] border-[1.5px] border-[var(--color-ink)] py-[6px] px-[14px] cursor-pointer transition-all duration-200 text-[15px] font-[inherit] hover:translate-x-[-1px] hover:translate-y-[-1px]"
-            style={{ boxShadow: "2px 2px 0 rgba(0,0,0,0.1)" }}
+            className="text-[var(--color-paper)] bg-[var(--color-ink)] border border-[var(--color-ink)] py-[5px] px-[12px] cursor-pointer transition-colors text-[14px] font-[500] hover:bg-neutral-800"
           >
             Connect Sources
           </button>
           <button
             onClick={() => setSettingsOpen(true)}
-            className="text-[var(--color-ink)] bg-transparent border-[1.5px] border-[var(--color-rule)] py-[6px] px-[14px] cursor-pointer transition-all duration-200 text-[15px] font-[inherit] hover:border-[var(--color-ink)] hover:bg-[var(--color-wash)]"
+            className="text-[var(--color-ink)] bg-transparent border border-[var(--color-rule)] py-[5px] px-[12px] cursor-pointer transition-colors text-[14px] font-[inherit] hover:border-[var(--color-ink)] hover:bg-[var(--color-wash)]"
           >
             Settings
           </button>
@@ -610,14 +607,13 @@ export default function Dashboard() {
             <>
               <button
                 onClick={() => setLoginOpen(true)}
-                className="text-[var(--color-paper)] bg-[var(--color-ink)] border-[1.5px] border-[var(--color-ink)] py-[6px] px-[14px] cursor-pointer transition-all duration-200 text-[15px] font-[600] hover:translate-x-[-1px] hover:translate-y-[-1px]"
-                style={{ boxShadow: "2px 2px 0 rgba(0,0,0,0.1)" }}
+                className="text-[var(--color-paper)] bg-[var(--color-ink)] border border-[var(--color-ink)] py-[5px] px-[12px] cursor-pointer transition-colors text-[14px] font-[600] hover:bg-neutral-800"
               >
                 Sign In
               </button>
               <button
                 onClick={exitGuest}
-                className="text-[var(--color-ink)] bg-transparent border-[1.5px] border-[var(--color-rule)] py-[6px] px-[14px] cursor-pointer transition-all duration-200 text-[15px] font-[inherit] hover:border-[var(--color-ink)] hover:bg-[var(--color-wash)]"
+                className="text-[var(--color-muted)] hover:text-[var(--color-ink)] bg-transparent border border-[var(--color-rule)] py-[5px] px-[12px] cursor-pointer transition-colors text-[14px] font-[inherit] hover:border-[var(--color-ink)]"
               >
                 Exit Demo
               </button>
@@ -625,7 +621,7 @@ export default function Dashboard() {
           ) : (
             <button
               onClick={logout}
-              className="text-[var(--color-ink)] bg-transparent border-[1.5px] border-[var(--color-rule)] py-[6px] px-[14px] cursor-pointer transition-all duration-200 text-[15px] font-[inherit] hover:border-[var(--color-ink)] hover:bg-[var(--color-wash)]"
+              className="text-[var(--color-muted)] hover:text-[var(--color-ink)] bg-transparent border border-[var(--color-rule)] py-[5px] px-[12px] cursor-pointer transition-colors text-[14px] font-[inherit] hover:border-[var(--color-ink)] hover:bg-[var(--color-wash)]"
             >
               Sign out
             </button>

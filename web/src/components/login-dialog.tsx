@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { IconUser } from "@/components/icons";
 
 interface LoginDialogProps {
   onClose: () => void;
@@ -26,10 +27,10 @@ export default function LoginDialog({ onClose, onSelectGuest }: LoginDialogProps
   return (
     <dialog
       ref={dialogRef}
-      className="bg-[var(--color-paper)] text-[var(--color-ink)] w-[min(480px,94vw)] p-8 rounded-none z-50 backdrop:bg-black/50"
+      className="bg-[var(--color-paper)] text-[var(--color-ink)] w-[min(460px,94vw)] p-7 rounded-none z-50 backdrop:bg-black/40"
       style={{
-        border: "2px solid var(--color-ink)",
-        boxShadow: "10px 10px 0 rgba(0,0,0,0.18)",
+        border: "1px solid var(--color-ink)",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
       }}
       onClose={onClose}
     >
@@ -120,9 +121,10 @@ export default function LoginDialog({ onClose, onSelectGuest }: LoginDialogProps
       {/* Guest Mode CTA inside dialog */}
       <button
         onClick={handleGuest}
-        className="w-full py-2.5 px-4 text-[14px] font-[600] text-[var(--color-ink)] bg-[var(--color-wash)] border-[1.5px] border-[var(--color-rule)] hover:border-[var(--color-ink)] hover:bg-[var(--color-paper)] transition-all cursor-pointer flex items-center justify-center gap-2"
+        className="w-full py-2.5 px-4 text-[13px] font-[500] text-[var(--color-ink)] bg-[var(--color-wash)] border border-[var(--color-rule)] hover:border-[var(--color-ink)] hover:bg-[var(--color-paper)] transition-colors cursor-pointer flex items-center justify-center gap-2"
       >
-        <span>👤 Continue as Guest (Demo Mode)</span>
+        <IconUser className="w-4 h-4 text-[var(--color-muted)]" />
+        <span>Explore as Guest</span>
       </button>
 
       <p className="text-[11px] text-[var(--color-muted)] mt-4 text-center">

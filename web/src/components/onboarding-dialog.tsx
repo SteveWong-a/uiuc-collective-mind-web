@@ -225,7 +225,7 @@ export default function OnboardingDialog({ onClose, onOpenExtensionGuide }: Onbo
             }}
             className="px-3 py-1.5 bg-transparent border-[1.5px] border-[var(--color-ink)] text-[13px] font-[600] text-[var(--color-ink)] hover:bg-[var(--color-paper)] cursor-pointer transition-all"
           >
-            Extension Guide ⓘ
+            Extension Guide
           </button>
           <a
             href="/downloads/uiuc-collective-mind-extension.zip"
