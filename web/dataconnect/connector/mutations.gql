@@ -1,0 +1,40 @@
+mutation UpsertUser($email: String!, $courseConfigs: String) @auth(level: USER) {
+  user_upsert(data: {
+    uid_expr: "auth.uid",
+    email: $email,
+    courseConfigs: $courseConfigs
+  })
+}
+
+mutation UpsertCourse($name: String!) @auth(level: USER) {
+  course_upsert(data: {
+    name: $name
+  })
+}
+
+mutation AddEnrollment($courseName: String!) @auth(level: USER) {
+  enrollment_upsert(data: {
+    user: { uid_expr: "auth.uid" },
+    course: { name: $courseName }
+  })
+}
+
+mutation UpsertAssignment($courseName: String!, $title: String!, $dueDate: Timestamp, $externalId: String!, $url: String, $source: String) @auth(level: USER) {
+  assignment_upsert(data: {
+    externalId: $externalId,
+    course: { name: $courseName },
+    title: $title,
+    dueDate: $dueDate,
+    url: $url,
+    source: $source
+  })
+}
+
+mutation UpsertUserAssignment($assignmentExternalId: String!, $score: String, $status: String) @auth(level: USER) {
+  userAssignment_upsert(data: {
+    user: { uid_expr: "auth.uid" },
+    assignment: { externalId: $assignmentExternalId },
+    score: $score,
+    status: $status
+  })
+}

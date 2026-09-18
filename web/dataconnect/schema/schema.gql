@@ -1,0 +1,30 @@
+type User @table(key: "uid") {
+  uid: String! @default(expr: "auth.uid")
+  email: String! @unique
+  courseConfigs: String
+}
+
+type Course @table(key: "name") {
+  name: String!
+}
+
+type Enrollment @table(key: ["user", "course"]) {
+  user: User!
+  course: Course!
+}
+
+type Assignment @table(key: "externalId") {
+  externalId: String!
+  course: Course!
+  title: String!
+  dueDate: Timestamp
+  url: String
+  source: String
+}
+
+type UserAssignment @table(key: ["user", "assignment"]) {
+  user: User!
+  assignment: Assignment!
+  score: String
+  status: String
+}

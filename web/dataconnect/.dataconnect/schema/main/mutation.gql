@@ -1,0 +1,512 @@
+extend type Mutation {
+  """
+  ✨ Insert a single `Assignment` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  assignment_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: Assignment_Data!
+  ): Assignment_KeyOutput! @fdc_generated(from: "Assignment", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert a single `Course` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  course_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: Course_Data!
+  ): Course_KeyOutput! @fdc_generated(from: "Course", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert a single `Enrollment` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  enrollment_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: Enrollment_Data!
+  ): Enrollment_KeyOutput! @fdc_generated(from: "Enrollment", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert a single `User` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  user_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: User_Data!
+  ): User_KeyOutput! @fdc_generated(from: "User", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert a single `UserAssignment` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  userAssignment_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: UserAssignment_Data!
+  ): UserAssignment_KeyOutput! @fdc_generated(from: "UserAssignment", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert `Assignment` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  assignment_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [Assignment_Data!]!
+  ): [Assignment_KeyOutput!]! @fdc_generated(from: "Assignment", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `Course` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  course_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [Course_Data!]!
+  ): [Course_KeyOutput!]! @fdc_generated(from: "Course", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `Enrollment` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  enrollment_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [Enrollment_Data!]!
+  ): [Enrollment_KeyOutput!]! @fdc_generated(from: "Enrollment", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `User` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  user_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [User_Data!]!
+  ): [User_KeyOutput!]! @fdc_generated(from: "User", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `UserAssignment` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  userAssignment_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [UserAssignment_Data!]!
+  ): [UserAssignment_KeyOutput!]! @fdc_generated(from: "UserAssignment", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert or update a single `Assignment` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Assignment`.
+  """
+  assignment_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: Assignment_Data!
+  ): Assignment_KeyOutput! @fdc_generated(from: "Assignment", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update a single `Course` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Course`.
+  """
+  course_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: Course_Data!
+  ): Course_KeyOutput! @fdc_generated(from: "Course", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update a single `Enrollment` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Enrollment`.
+  """
+  enrollment_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: Enrollment_Data!
+  ): Enrollment_KeyOutput! @fdc_generated(from: "Enrollment", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update a single `User` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `User`.
+  """
+  user_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: User_Data!
+  ): User_KeyOutput! @fdc_generated(from: "User", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update a single `UserAssignment` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `UserAssignment`.
+  """
+  userAssignment_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: UserAssignment_Data!
+  ): UserAssignment_KeyOutput! @fdc_generated(from: "UserAssignment", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update `Assignment` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Assignment`.
+  """
+  assignment_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [Assignment_Data!]!
+  ): [Assignment_KeyOutput!]! @fdc_generated(from: "Assignment", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `Course` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Course`.
+  """
+  course_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [Course_Data!]!
+  ): [Course_KeyOutput!]! @fdc_generated(from: "Course", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `Enrollment` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Enrollment`.
+  """
+  enrollment_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [Enrollment_Data!]!
+  ): [Enrollment_KeyOutput!]! @fdc_generated(from: "Enrollment", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `User` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `User`.
+  """
+  user_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [User_Data!]!
+  ): [User_KeyOutput!]! @fdc_generated(from: "User", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `UserAssignment` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `UserAssignment`.
+  """
+  userAssignment_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [UserAssignment_Data!]!
+  ): [UserAssignment_KeyOutput!]! @fdc_generated(from: "UserAssignment", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Update a single `Assignment` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `Assignment` or `null` if not found.
+  """
+  assignment_update(
+    """
+    The key used to identify the object.
+    """
+    key: Assignment_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Assignment_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: Assignment_Data!
+  ): Assignment_KeyOutput @fdc_generated(from: "Assignment", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update a single `Course` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `Course` or `null` if not found.
+  """
+  course_update(
+    """
+    The key used to identify the object.
+    """
+    key: Course_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Course_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: Course_Data!
+  ): Course_KeyOutput @fdc_generated(from: "Course", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update a single `Enrollment` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `Enrollment` or `null` if not found.
+  """
+  enrollment_update(
+    """
+    The key used to identify the object.
+    """
+    key: Enrollment_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Enrollment_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: Enrollment_Data!
+  ): Enrollment_KeyOutput @fdc_generated(from: "Enrollment", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update a single `User` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `User` or `null` if not found.
+  """
+  user_update(
+    """
+    The key used to identify the object.
+    """
+    key: User_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: User_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: User_Data!
+  ): User_KeyOutput @fdc_generated(from: "User", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update a single `UserAssignment` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `UserAssignment` or `null` if not found.
+  """
+  userAssignment_update(
+    """
+    The key used to identify the object.
+    """
+    key: UserAssignment_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: UserAssignment_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: UserAssignment_Data!
+  ): UserAssignment_KeyOutput @fdc_generated(from: "UserAssignment", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update `Assignment` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  assignment_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: Assignment_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: Assignment_Data!
+  ): Int! @fdc_generated(from: "Assignment", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Update `Course` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  course_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: Course_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: Course_Data!
+  ): Int! @fdc_generated(from: "Course", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Update `Enrollment` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  enrollment_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: Enrollment_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: Enrollment_Data!
+  ): Int! @fdc_generated(from: "Enrollment", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Update `User` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  user_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: User_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: User_Data!
+  ): Int! @fdc_generated(from: "User", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Update `UserAssignment` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  userAssignment_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: UserAssignment_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: UserAssignment_Data!
+  ): Int! @fdc_generated(from: "UserAssignment", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Delete a single `Assignment` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  assignment_delete(
+    """
+    The key used to identify the object.
+    """
+    key: Assignment_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Assignment_FirstRow
+  ): Assignment_KeyOutput @fdc_generated(from: "Assignment", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete a single `Course` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  course_delete(
+    """
+    The key used to identify the object.
+    """
+    key: Course_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Course_FirstRow
+  ): Course_KeyOutput @fdc_generated(from: "Course", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete a single `Enrollment` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  enrollment_delete(
+    """
+    The key used to identify the object.
+    """
+    key: Enrollment_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: Enrollment_FirstRow
+  ): Enrollment_KeyOutput @fdc_generated(from: "Enrollment", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete a single `User` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  user_delete(
+    """
+    The key used to identify the object.
+    """
+    key: User_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: User_FirstRow
+  ): User_KeyOutput @fdc_generated(from: "User", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete a single `UserAssignment` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  userAssignment_delete(
+    """
+    The key used to identify the object.
+    """
+    key: UserAssignment_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: UserAssignment_FirstRow
+  ): UserAssignment_KeyOutput @fdc_generated(from: "UserAssignment", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete `Assignment` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  assignment_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: Assignment_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "Assignment", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `Course` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  course_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: Course_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "Course", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `Enrollment` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  enrollment_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: Enrollment_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "Enrollment", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `User` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  user_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: User_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "User", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `UserAssignment` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  userAssignment_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: UserAssignment_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "UserAssignment", purpose: DELETE_MULTIPLE)
+}

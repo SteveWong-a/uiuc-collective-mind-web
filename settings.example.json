@@ -1,0 +1,19 @@
+{
+  "port": 4258,
+  "pollMinutes": 30,
+  "taskLeadDays": 3,
+  "blockStartHour": 20,
+  "blockEndHour": 23,
+  "blockWithinHours": 24,
+  "appHost": "course.localhost",
+  "canvasBase": "https://canvas.illinois.edu",
+  "canvasFeedUrl": "",
+  "courses": [
+    { "course": "CS 128",  "source": "cs128" },
+    { "course": "CS 128",  "source": "prairielearn", "instanceId": "<your-pl-instance-id>" },
+    { "course": "CS 173",  "source": "prairielearn", "instanceId": "<your-pl-instance-id>" },
+    { "course": "PHYS 212","source": "smartphysics",  "enrollmentId": "<your-enrollment-id>" },
+    { "course": "ENG 100", "source": "canvas",        "courseId": "<your-canvas-course-id>" },
+    { "course": "CBTF",    "source": "prairietest" }
+  ]
+}

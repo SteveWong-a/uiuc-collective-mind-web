@@ -1,0 +1,27 @@
+appId: com.uiuc-collective-mind.desktop
+productName: UIUC Collective Mind
+copyright: Copyright © 2026 UIUC Collective Mind Contributors
+directories:
+  output: dist-app
+  buildResources: resources
+files:
+  - dist/**/*
+  - package.json
+  - assets/**/*
+asar: false
+mac:
+  target: dmg
+  category: public.app-category.education
+  icon: assets/icon.icns
+  hardenedRuntime: true
+  entitlements: resources/entitlements.mac.plist
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: assets/icon.png
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true

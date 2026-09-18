@@ -1,0 +1,501 @@
+<!DOCTYPE html><html lang="en"><head>
+        
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="HX-Assets-Version" content="907ff28229c053f0eb55a57ee99c039bfbab717e95e78220a396b43cc945d2bc">
+    <title>Home — PrairieTest</title>
+    <link href="/cacheable_node_modules/f5a36452276fee8a/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/cacheable_node_modules/a38a1050d45a66fa/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/build/stylesheets/vendor-J2RUCPK3.css">
+    <link href="/assets/adadfba5b410f709/stylesheets/local.css" rel="stylesheet">
+    <link href="/assets/adadfba5b410f709/stylesheets/colors.css" rel="stylesheet">
+    <script src="/cacheable_node_modules/332b5ada10be1415/jquery/dist/jquery.min.js"></script>
+    <script src="/cacheable_node_modules/f5a36452276fee8a/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/build/scripts/application-76BI7EQW.js"></script>
+    <meta name="csrf-token" content="ZTg3MWQ3NzY0YTAwYmM1MGQ0MDNlMWJiNTc4MWVkNTk1NzM2ZWUzNzk2NzQ1MDY4ZmVmNDI0YTNkNDJiZjM0NA.mtq2enrt.eyJ1cmwiOiIvcHQiLCJ1c2VyX2lkIjoiNTE5NzU0OCJ9">
+  <script src="/build/scripts/homeClient-T2TLIFC3.js"></script>
+      <style>                      .htmx-indicator{opacity:0}                      .htmx-request .htmx-indicator{opacity:1; transition: opacity 200ms ease-in;}                      .htmx-request.htmx-indicator{opacity:1; transition: opacity 200ms ease-in;}                    </style></head>
+      <body>
+        
+    
+    <div class="container-fluid bg-primary visually-hidden-focusable">
+      <a href="#content" class="d-inline-flex p-2 m-2 text-white">Skip to main content</a>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/pt">PrairieTest</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContentqmvcsidenh" aria-controls="navbarSupportedContentqmvcsidenh" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContentqmvcsidenh">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link active" href="/pt">Home</a></li>
+          </ul>
+
+          
+                <div class="d-flex">
+                  <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    
+    <li class="nav-item dropdown">
+      <a class="nav-link  dropdown-toggle" href="#" id="navbarScrollingDropdownDocs" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Docs
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarScrollingDropdownDocs">
+        <li>
+          <a class="dropdown-item" href="/pt/docs/students" id="docs-menu-student">
+            For students
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item" href="/pt/docs/course" id="docs-menu-course">
+            For course staff
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item" href="/pt/docs/center" id="docs-menu-center">
+            For testing center staff
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item" href="/pt/docs/federation" id="docs-menu-federation">
+            For federation staff
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item" href="/pt/docs/admin" id="docs-menu-admin">
+            For administrators
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item" href="/pt/docs/api" id="docs-menu-api"> API </a>
+        </li>
+      </ul>
+    </li>
+  
+                    
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle " href="#" id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Student Name
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarScrollingDropdown">
+        <p class="px-4 text-nowrap">student@illinois.edu</p>
+        
+        <li><a class="dropdown-item" href="/pt/settings">Settings</a></li>
+        <li>
+          <a class="dropdown-item" href="/pt/logout">Log out</a>
+        </li>
+      </ul>
+    </li>
+  
+                  </ul>
+                </div>
+              
+        </div>
+      </div>
+    </nav>
+  
+    
+    
+    
+  
+    <div class="modal fade  " tabindex="-1" role="dialog" id="rejectEnrollmentInviteModal" aria-labelledby="rejectEnrollmentInviteModal-title">
+      <div class="modal-dialog modal-lg " role="document">
+        <form class="modal-content" method="POST" autocomplete="off">
+          <div class="modal-header">
+            <h2 class="modal-title" id="rejectEnrollmentInviteModal-title">Reject invitation</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+      <p>
+        Are you sure you want to reject the invitation to join
+        <strong><span class="js-course-name"></span>: <span class="js-course-title"></span></strong>
+        as a student?
+      </p>
+    </div> 
+          <div class="modal-footer">
+      <input type="hidden" name="__action" value="rejectEnrollmentInvite">
+      <input type="hidden" name="__csrf_token" value="REDACTED">
+      <input type="hidden" name="unsafe_enrollment_id" class="js-enrollment-id">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button type="submit" class="btn btn-danger">Reject invitation</button>
+    </div>
+        </form>
+      </div>
+    </div>
+  
+    <div class="modal fade  " tabindex="-1" role="dialog" id="rejectCourseStaffInviteModal" aria-labelledby="rejectCourseStaffInviteModal-title">
+      <div class="modal-dialog modal-lg " role="document">
+        <form class="modal-content" method="POST" autocomplete="off">
+          <div class="modal-header">
+            <h2 class="modal-title" id="rejectCourseStaffInviteModal-title">Reject invitation</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+      <p>
+        Are you sure you want to reject the invitation to join
+        <strong><span class="js-course-name"></span>: <span class="js-course-title"></span></strong>
+        as staff?
+      </p>
+    </div> 
+          <div class="modal-footer">
+      <input type="hidden" name="__action" value="rejectCourseStaffInvite">
+      <input type="hidden" name="__csrf_token" value="REDACTED">
+      <input type="hidden" name="unsafe_course_staff_id" class="js-course-staff-id">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button type="submit" class="btn btn-danger">Reject invitation</button>
+    </div>
+        </form>
+      </div>
+    </div>
+  
+    <div class="modal fade  " tabindex="-1" role="dialog" id="rejectCenterStaffInviteModal" aria-labelledby="rejectCenterStaffInviteModal-title">
+      <div class="modal-dialog modal-lg " role="document">
+        <form class="modal-content" method="POST" autocomplete="off">
+          <div class="modal-header">
+            <h2 class="modal-title" id="rejectCenterStaffInviteModal-title">Reject invitation</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+      <p>
+        Are you sure you want to reject the invitation to join
+        <strong><span class="js-center-name"></span>: <span class="js-center-title"></span></strong>
+        as staff?
+      </p>
+    </div> 
+          <div class="modal-footer">
+      <input type="hidden" name="__action" value="rejectCenterStaffInvite">
+      <input type="hidden" name="__csrf_token" value="REDACTED">
+      <input type="hidden" name="unsafe_center_staff_id" class="js-center-staff-id">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button type="submit" class="btn btn-danger">Reject invitation</button>
+    </div>
+        </form>
+      </div>
+    </div>
+  
+    <div class="modal fade  " tabindex="-1" role="dialog" id="rejectFederationStaffInviteModal" aria-labelledby="rejectFederationStaffInviteModal-title">
+      <div class="modal-dialog modal-lg " role="document">
+        <form class="modal-content" method="POST" autocomplete="off">
+          <div class="modal-header">
+            <h2 class="modal-title" id="rejectFederationStaffInviteModal-title">Reject invitation</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+      <p>
+        Are you sure you want to reject the invitation to join
+        <strong><span class="js-federation-title"></span></strong>
+        as staff?
+      </p>
+    </div> 
+          <div class="modal-footer">
+      <input type="hidden" name="__action" value="rejectFederationStaffInvite">
+      <input type="hidden" name="__csrf_token" value="REDACTED">
+      <input type="hidden" name="unsafe_federation_staff_id" class="js-federation-staff-id">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button type="submit" class="btn btn-danger">Reject invitation</button>
+    </div>
+        </form>
+      </div>
+    </div>
+  
+    <div class="modal fade  " tabindex="-1" role="dialog" id="rejectInstitutionAdministratorInviteModal" aria-labelledby="rejectInstitutionAdministratorInviteModal-title">
+      <div class="modal-dialog modal-lg " role="document">
+        <form class="modal-content" method="POST" autocomplete="off">
+          <div class="modal-header">
+            <h2 class="modal-title" id="rejectInstitutionAdministratorInviteModal-title">Reject invitation</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+      <p>
+        Are you sure you want to reject the invitation to join
+        <strong><span class="js-institution-short-name"></span>:
+          <span class="js-institution-long-name"></span></strong>
+        as an administrator?
+      </p>
+    </div> 
+          <div class="modal-footer">
+      <input type="hidden" name="__action" value="rejectInstitutionAdministratorInvite">
+      <input type="hidden" name="__csrf_token" value="REDACTED">
+      <input type="hidden" name="unsafe_institution_administrator_id" class="js-institution-administrator-id">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button type="submit" class="btn btn-danger">Reject invitation</button>
+    </div>
+        </form>
+      </div>
+    </div>
+  
+        <main id="content" class="container">
+          <h1 class="visually-hidden">PrairieTest Homepage</h1>
+          
+    <div class="card my-4">
+      <div class="card-header bg-primary text-white">
+        <h2>Exams available for reservations</h2>
+      </div>
+      <ul class="list-group list-group-flush">
+        
+              
+                  <li class="list-group-item">
+                    <div class="container p-0">
+                      <div class="row align-items-center">
+                        <div class="col-xl-2 col-md-3 order-last order-md-first" data-testid="action">
+                          <a class="btn btn-success btn-sm" href="/pt/student/exam/76708" aria-label="Make a reservation for CS 124 (Fa26): Q2: Loops and Arrays (Q1 Retakes)">
+                            Make a reservation
+                          </a>
+                        </div>
+                        <div class="col-xl-5 col-md-4" data-testid="exam">
+                          CS 124 (Fa26): Q2: Loops and Arrays (Q1 Retakes)
+                        </div>
+                        <div class="col-xl-5 col-md-5" data-testid="dates">
+                          <span class="js-format-date-range-friendly-live-update" data-format-date-range="{&quot;start&quot;:&quot;2026-09-08T05:01:00.000Z&quot;,&quot;end&quot;:&quot;2026-09-10T04:59:00.000Z&quot;,&quot;timezone&quot;:&quot;America/Chicago&quot;,&quot;options&quot;:{&quot;dateOnly&quot;:true,&quot;liveUpdate&quot;:true}}" data-bs-toggle="tooltip" data-bs-title="2026-09-08 00:01:00 — 2026-09-09 23:59:00 (Central Daylight Time)">Tue, Sep&nbsp;8 to Wed, Sep&nbsp;9 (CDT)</span>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                
+                  <li class="list-group-item">
+                    <div class="container p-0">
+                      <div class="row align-items-center">
+                        <div class="col-xl-2 col-md-3 order-last order-md-first" data-testid="action">
+                          <a class="btn btn-success btn-sm" href="/pt/student/exam/76709" aria-label="Make a reservation for CS 124 (Fa26): Q3: Functions (Q2 Retakes)">
+                            Make a reservation
+                          </a>
+                        </div>
+                        <div class="col-xl-5 col-md-4" data-testid="exam">
+                          CS 124 (Fa26): Q3: Functions (Q2 Retakes)
+                        </div>
+                        <div class="col-xl-5 col-md-5" data-testid="dates">
+                          <span class="js-format-date-range-friendly-live-update" data-format-date-range="{&quot;start&quot;:&quot;2026-09-14T05:01:00.000Z&quot;,&quot;end&quot;:&quot;2026-09-16T04:59:00.000Z&quot;,&quot;timezone&quot;:&quot;America/Chicago&quot;,&quot;options&quot;:{&quot;dateOnly&quot;:true,&quot;liveUpdate&quot;:true}}" data-bs-toggle="tooltip" data-bs-title="2026-09-14 00:01:00 — 2026-09-15 23:59:00 (Central Daylight Time)">Mon, Sep&nbsp;14 to Tue, Sep&nbsp;15 (CDT)</span>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                
+            
+      </ul>
+    </div>
+  
+    <div class="card mt-4">
+      <div class="card-header bg-primary text-white">
+        <h2>Exam reservations</h2>
+      </div>
+      <ul class="list-group list-group-flush">
+        
+    
+        <li class="list-group-item">
+          <div class="container p-0">
+            <div class="row">
+              <div class="col-xxl-3 col-md-6 col-xs-12" data-testid="exam">
+                <a href="/pt/student/reservation/3585068">
+                      ENG 100/101/300/398 (Fa26): Intro to CBTF
+                    </a>
+              </div>
+              <div class="col-xxl-3 col-md-6 col-xs-12" data-testid="date">
+                <span class="js-format-date-friendly-live-update" data-format-date="{&quot;date&quot;:&quot;2026-09-08T23:15:00.000Z&quot;,&quot;timezone&quot;:&quot;America/Chicago&quot;,&quot;options&quot;:{&quot;liveUpdate&quot;:true}}" data-bs-toggle="tooltip" data-bs-title="2026-09-08 18:15:00 (Central Daylight Time)">Tue, Sep&nbsp;8, 6:15pm (CDT)</span>
+              </div>
+              <div class="col-xxl-2 col-md-6 col-xs-12" data-testid="location">
+                CBTF: <a href="https://cbtf.illinois.edu/students/labs/chem">Chem Annex</a>
+                <br><small class="text-muted">Chemistry Annex - Second Floor</small>
+              </div>
+              <div class="col-xxl-4 col-md-6 col-xs-12">
+                50min,
+                In-person,
+                No accommodations
+                
+                
+              </div>
+            </div>
+          </div>
+        </li>
+      
+        <li class="list-group-item">
+          <div class="container p-0">
+            <div class="row">
+              <div class="col-xxl-3 col-md-6 col-xs-12" data-testid="exam">
+                <a href="/pt/student/reservation/3576802">
+                      CS 128 (Fa26): Quiz 2
+                    </a>
+              </div>
+              <div class="col-xxl-3 col-md-6 col-xs-12" data-testid="date">
+                <span class="js-format-date-friendly-live-update" data-format-date="{&quot;date&quot;:&quot;2026-09-11T23:00:00.000Z&quot;,&quot;timezone&quot;:&quot;America/Chicago&quot;,&quot;options&quot;:{&quot;liveUpdate&quot;:true}}" data-bs-toggle="tooltip" data-bs-title="2026-09-11 18:00:00 (Central Daylight Time)">Fri, Sep&nbsp;11, 6pm (CDT)</span>
+              </div>
+              <div class="col-xxl-2 col-md-6 col-xs-12" data-testid="location">
+                CBTF: <a href="https://cbtf.illinois.edu/students/labs/gr">Grainger Library 057</a>
+                <br><small class="text-muted">Room 057 in the basement of Grainger Library</small>
+              </div>
+              <div class="col-xxl-4 col-md-6 col-xs-12">
+                50min,
+                In-person,
+                No accommodations
+                
+                
+              </div>
+            </div>
+          </div>
+        </li>
+      
+        <li class="list-group-item">
+          <div class="container p-0">
+            <div class="row">
+              <div class="col-xxl-3 col-md-6 col-xs-12" data-testid="exam">
+                <a href="/pt/student/reservation/3576779">
+                      MATH 257 (Fa26): Midterm 1
+                    </a>
+              </div>
+              <div class="col-xxl-3 col-md-6 col-xs-12" data-testid="date">
+                <span class="js-format-date-friendly-live-update" data-format-date="{&quot;date&quot;:&quot;2026-09-14T22:00:00.000Z&quot;,&quot;timezone&quot;:&quot;America/Chicago&quot;,&quot;options&quot;:{&quot;liveUpdate&quot;:true}}" data-bs-toggle="tooltip" data-bs-title="2026-09-14 17:00:00 (Central Daylight Time)">Mon, Sep&nbsp;14, 5pm (CDT)</span>
+              </div>
+              <div class="col-xxl-2 col-md-6 col-xs-12" data-testid="location">
+                CBTF: <a href="https://cbtf.illinois.edu/students/labs/gr">Grainger Library 057</a>
+                <br><small class="text-muted">Room 057 in the basement of Grainger Library</small>
+              </div>
+              <div class="col-xxl-4 col-md-6 col-xs-12">
+                50min,
+                In-person,
+                No accommodations
+                
+                
+              </div>
+            </div>
+          </div>
+        </li>
+      
+        <li class="list-group-item">
+          <div class="container p-0">
+            <div class="row">
+              <div class="col-xxl-3 col-md-6 col-xs-12" data-testid="exam">
+                <a href="/pt/student/reservation/3576782">
+                      CS 128 (Fa26): Quiz 3
+                    </a>
+              </div>
+              <div class="col-xxl-3 col-md-6 col-xs-12" data-testid="date">
+                <span class="js-format-date-friendly-live-update" data-format-date="{&quot;date&quot;:&quot;2026-09-18T21:00:00.000Z&quot;,&quot;timezone&quot;:&quot;America/Chicago&quot;,&quot;options&quot;:{&quot;liveUpdate&quot;:true}}" data-bs-toggle="tooltip" data-bs-title="2026-09-18 16:00:00 (Central Daylight Time)">Fri, Sep&nbsp;18, 4pm (CDT)</span>
+              </div>
+              <div class="col-xxl-2 col-md-6 col-xs-12" data-testid="location">
+                CBTF: <a href="https://cbtf.illinois.edu/students/labs/gr">Grainger Library 057</a>
+                <br><small class="text-muted">Room 057 in the basement of Grainger Library</small>
+              </div>
+              <div class="col-xxl-4 col-md-6 col-xs-12">
+                50min,
+                In-person,
+                No accommodations
+                
+                
+              </div>
+            </div>
+          </div>
+        </li>
+      
+  
+      </ul>
+    </div>
+
+    
+          <button type="button" class="btn btn-xs btn-outline-secondary my-2" data-bs-toggle="collapse" data-bs-target="#pastReservations" aria-expanded="false" aria-controls="pastReservations">
+            <i class="bi-caret-down-fill"></i> Show past reservations
+          </button>
+
+          <div class="card mb-4 collapse" id="pastReservations">
+            <div class="card-header bg-primary text-white">
+              <h2>Past exam reservations</h2>
+            </div>
+            <ul class="list-group list-group-flush">
+              
+    
+        <li class="list-group-item">
+          <div class="container p-0">
+            <div class="row">
+              <div class="col-xxl-3 col-md-6 col-xs-12" data-testid="exam">
+                CS 124 Proficiency Exam (Fa26): CS 124 Proficiency Exam
+              </div>
+              <div class="col-xxl-3 col-md-6 col-xs-12" data-testid="date">
+                <span class="js-format-date-friendly-live-update" data-format-date="{&quot;date&quot;:&quot;2026-08-24T23:00:00.000Z&quot;,&quot;timezone&quot;:&quot;America/Chicago&quot;,&quot;options&quot;:{&quot;liveUpdate&quot;:true}}" data-bs-toggle="tooltip" data-bs-title="2026-08-24 18:00:00 (Central Daylight Time)">Mon, Aug&nbsp;24, 6pm (CDT)</span>
+              </div>
+              <div class="col-xxl-2 col-md-6 col-xs-12" data-testid="location">
+                CBTF: <a href="https://cbtf.illinois.edu/students/labs/gr">Grainger Library 057</a>
+                <br><small class="text-muted">Room 057 in the basement of Grainger Library</small>
+              </div>
+              <div class="col-xxl-4 col-md-6 col-xs-12">
+                1h 50min,
+                In-person,
+                No accommodations
+                
+                
+              </div>
+            </div>
+          </div>
+        </li>
+      
+        <li class="list-group-item">
+          <div class="container p-0">
+            <div class="row">
+              <div class="col-xxl-3 col-md-6 col-xs-12" data-testid="exam">
+                CS 128 Proficiency Exam (Fa26): CS 128 Proficiency Exam
+              </div>
+              <div class="col-xxl-3 col-md-6 col-xs-12" data-testid="date">
+                <span class="js-format-date-friendly-live-update" data-format-date="{&quot;date&quot;:&quot;2026-08-25T20:00:00.000Z&quot;,&quot;timezone&quot;:&quot;America/Chicago&quot;,&quot;options&quot;:{&quot;liveUpdate&quot;:true}}" data-bs-toggle="tooltip" data-bs-title="2026-08-25 15:00:00 (Central Daylight Time)">Tue, Aug&nbsp;25, 3pm (CDT)</span>
+              </div>
+              <div class="col-xxl-2 col-md-6 col-xs-12" data-testid="location">
+                CBTF: <a href="https://cbtf.illinois.edu/students/labs/gr">Grainger Library 057</a>
+                <br><small class="text-muted">Room 057 in the basement of Grainger Library</small>
+              </div>
+              <div class="col-xxl-4 col-md-6 col-xs-12">
+                2h 50min,
+                In-person,
+                No accommodations
+                
+                
+              </div>
+            </div>
+          </div>
+        </li>
+      
+        <li class="list-group-item">
+          <div class="container p-0">
+            <div class="row">
+              <div class="col-xxl-3 col-md-6 col-xs-12" data-testid="exam">
+                CS 128 (Fa26): Quiz 1
+              </div>
+              <div class="col-xxl-3 col-md-6 col-xs-12" data-testid="date">
+                <span class="js-format-date-friendly-live-update" data-format-date="{&quot;date&quot;:&quot;2026-09-04T21:15:00.000Z&quot;,&quot;timezone&quot;:&quot;America/Chicago&quot;,&quot;options&quot;:{&quot;liveUpdate&quot;:true}}" data-bs-toggle="tooltip" data-bs-title="2026-09-04 16:15:00 (Central Daylight Time)">Fri, Sep&nbsp;4, 4:15pm (CDT)</span>
+              </div>
+              <div class="col-xxl-2 col-md-6 col-xs-12" data-testid="location">
+                CBTF: <a href="https://cbtf.illinois.edu/students/labs/chem">Chem Annex</a>
+                <br><small class="text-muted">Chemistry Annex - Second Floor</small>
+              </div>
+              <div class="col-xxl-4 col-md-6 col-xs-12">
+                50min,
+                In-person,
+                No accommodations
+                
+                
+              </div>
+            </div>
+          </div>
+        </li>
+      
+  
+            </ul>
+          </div>
+        
+  
+    <div class="card my-4">
+      <div class="card-header bg-primary text-white">
+        <h2>Testing center availability</h2>
+      </div>
+      <ul class="list-group list-group-flush">
+        
+            <li class="list-group-item">
+              <a href="/pt/student/center/4002">
+                CBTF (Fa26): Computer-Based Testing Facility
+              </a>
+            </li>
+          
+      </ul>
+    </div>
+  
+        </main>
+      
+    </body></html>

@@ -1,0 +1,13 @@
+{
+  "dataconnect": {
+    "source": "dataconnect"
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "UIUC Collective Mind",
+        "supportEmail": "stevetsname@gmail.com"
+      }
+    }
+  }
+}

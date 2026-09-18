@@ -1,0 +1,26 @@
+extend type Assignment {
+  """
+  ✨ Implicit foreign key field based on `Assignment`.`course`. It must match the value of `Course`.`name`. See `@ref` for how to customize it.
+  """
+  courseName: String! @fdc_generated(from: "Assignment.course", purpose: IMPLICIT_REF_FIELD)
+}
+extend type Enrollment {
+  """
+  ✨ Implicit foreign key field based on `Enrollment`.`user`. It must match the value of `User`.`uid`. See `@ref` for how to customize it.
+  """
+  userUid: String! @fdc_generated(from: "Enrollment.user", purpose: IMPLICIT_REF_FIELD)
+  """
+  ✨ Implicit foreign key field based on `Enrollment`.`course`. It must match the value of `Course`.`name`. See `@ref` for how to customize it.
+  """
+  courseName: String! @fdc_generated(from: "Enrollment.course", purpose: IMPLICIT_REF_FIELD)
+}
+extend type UserAssignment {
+  """
+  ✨ Implicit foreign key field based on `UserAssignment`.`user`. It must match the value of `User`.`uid`. See `@ref` for how to customize it.
+  """
+  userUid: String! @fdc_generated(from: "UserAssignment.user", purpose: IMPLICIT_REF_FIELD)
+  """
+  ✨ Implicit foreign key field based on `UserAssignment`.`assignment`. It must match the value of `Assignment`.`externalId`. See `@ref` for how to customize it.
+  """
+  assignmentExternalId: String! @fdc_generated(from: "UserAssignment.assignment", purpose: IMPLICIT_REF_FIELD)
+}

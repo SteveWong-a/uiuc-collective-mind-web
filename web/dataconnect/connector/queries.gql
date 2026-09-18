@@ -1,0 +1,30 @@
+query GetUser @auth(level: USER) {
+  user(key: { uid_expr: "auth.uid" }) {
+    uid
+    email
+    courseConfigs
+  }
+}
+
+query MyCourses @auth(level: USER) {
+  enrollments(where: { user: { uid: { eq_expr: "auth.uid" } } }) {
+    course {
+      name
+    }
+  }
+}
+
+query MyAssignments @auth(level: USER) {
+  userAssignments(where: { user: { uid: { eq_expr: "auth.uid" } } }) {
+    assignment {
+      title
+      dueDate
+      externalId
+      course {
+        name
+      }
+    }
+    score
+    status
+  }
+}

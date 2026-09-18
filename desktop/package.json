@@ -1,0 +1,30 @@
+{
+  "name": "uiuc-collective-mind-desktop",
+  "version": "0.1.0",
+  "description": "UIUC Collective Mind Desktop App",
+  "author": "UIUC Collective Mind Contributors",
+  "homepage": "https://github.com/uiucDavid/uiuc_collective_mind",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uiucDavid/uiuc_collective_mind.git"
+  },
+  "license": "MIT",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "tsc && electron .",
+    "build": "tsc && node copy-dist.mjs",
+    "build:mac": "npm run build && electron-builder --mac",
+    "build:win": "npm run build && electron-builder --win",
+    "build:all": "npm run build && electron-builder --mac --win",
+    "pack": "electron-builder --dir"
+  },
+  "dependencies": {
+    "jsdom": "^25.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "electron": "^34.0.0",
+    "electron-builder": "^25.0.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,11 @@
+specVersion: "v1"
+serviceId: "uiuc-cmind"
+location: "us-central1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "uiuc_cmind_db"
+      cloudSql:
+        instanceId: "uiuc-cmind-instance"
+connectorDirs: ["./connector"]

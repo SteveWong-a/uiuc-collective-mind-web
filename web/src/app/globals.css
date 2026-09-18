@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --font-grotesk: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --color-ink: #000;
+  --color-paper: #fff;
+  --color-rule: #d8d8d8;
+  --color-wash: #f3f3f3;
+  --color-muted: #6a6a6a;
+  --color-green: #1a9e4a;
+  --color-amber: #d97706;
+  --color-red: #d00;
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { color-scheme: light; }
+  body {
+    margin: 0;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-grotesk);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+}

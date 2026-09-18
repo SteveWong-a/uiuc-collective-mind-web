@@ -1,0 +1,42 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:icalendar-ruby
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Student Name Calendar (Canvas)
+X-WR-CALDESC:Calendar events for the user\, Student Name
+BEGIN:VEVENT
+DTSTAMP:20260827T163400Z
+UID:event-assignment-1710786
+DTSTART;VALUE=DATE;VALUE=DATE:20260826
+CLASS:PUBLIC
+DESCRIPTION:
+SEQUENCE:0
+SUMMARY:AI Policy Quiz [rhet_105_120268_264045]
+URL;VALUE=URI:https://canvas.illinois.edu/calendar?include_contexts=course_
+ 72592&month=08&year=2026#assignment_1710786
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20260901T024600Z
+UID:event-assignment-1763420
+DTSTART:20260910T150000Z
+DTEND:20260910T150000Z
+CLASS:PUBLIC
+DESCRIPTION:Homework 1: due September 10\, Thursday 10am sharp. In case une
+SEQUENCE:0
+SUMMARY:homework 1 [math_580_120268_266429]
+URL;VALUE=URI:https://canvas.illinois.edu/calendar?include_contexts=course_
+ 74998&month=09&year=2026#assignment_1763420
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20260706T192100Z
+UID:event-calendar-event-773567
+DTSTART;VALUE=DATE;VALUE=DATE:20261005
+CLASS:PUBLIC
+LOCATION:
+SEQUENCE:0
+SUMMARY:ACE IT workshop due [vcstud_cc_open_249979]
+URL;VALUE=URI:https://canvas.illinois.edu/calendar?include_contexts=course_
+ 59107&month=10&year=2026#calendar_event_773567
+END:VEVENT
+END:VCALENDAR

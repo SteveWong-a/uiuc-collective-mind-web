@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "UIUC Collective Mind Sync",
+  "version": "1.0.0",
+  "description": "Securely fetches your UIUC Canvas assignments for Collective Mind.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://canvas.illinois.edu/*",
+    "https://us.prairielearn.com/*",
+    "https://cs128.org/*",
+    "https://smart.physics.illinois.edu/*",
+    "http://localhost:3000/*",
+    "https://uiuc-cmind-2026.web.app/*",
+    "https://uiuc-cmind-2026.firebaseapp.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:3000/*",
+        "https://uiuc-cmind-2026.web.app/*",
+        "https://uiuc-cmind-2026.firebaseapp.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {}
+}

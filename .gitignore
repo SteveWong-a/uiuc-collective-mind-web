@@ -1,0 +1,10 @@
+node_modules/
+profile/
+data/
+settings.json
+.env
+.env.*
+*.png
+.playwright-mcp/
+.superpowers/
+logs/

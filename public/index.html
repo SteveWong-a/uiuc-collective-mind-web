@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UIUC Collective Mind</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23000%27/%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%278%27 fill=%27none%27 stroke=%27%23fff%27 stroke-width=%273%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #000; --paper: #fff; --rule: #d8d8d8; --wash: #f3f3f3; --muted: #6a6a6a;
+    --font: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  * { box-sizing: border-box; }
+  html { color-scheme: light; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 var(--font); transition: background 0.3s, color 0.3s; }
+  .num, .time, .grade { font-variant-numeric: tabular-nums; }
+  a { color: inherit; text-decoration-color: var(--rule); transition: color 0.2s; }
+  a:hover { color: var(--ink); text-decoration-color: var(--ink); }
+  button { font: inherit; color: var(--paper); background: var(--ink); border: 1.5px solid var(--ink); border-radius: 0; padding: 6px 14px; cursor: pointer; transition: all 0.2s ease; box-shadow: 2px 2px 0 rgba(0,0,0,0.1); }
+  button:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 rgba(0,0,0,0.15); }
+  button:active { transform: translate(1px, 1px); box-shadow: 0 0 0 rgba(0,0,0,0.1); }
+  button.ghost { color: var(--ink); background: transparent; border: 1.5px solid var(--rule); box-shadow: none; }
+  button.ghost:hover { border-color: var(--ink); background: var(--wash); color: var(--ink); transform: none; box-shadow: 2px 2px 0 rgba(0,0,0,0.1); }
+  button:focus-visible, .chip:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  header { display: flex; align-items: baseline; gap: 16px; padding: 22px 28px 14px; border-bottom: 1.5px solid var(--ink); flex-wrap: wrap; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(4px); position: sticky; top: 0; z-index: 10; margin-top: -22px; padding-top: 44px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+  header h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.01em; }
+  header .poll { color: var(--muted); }
+  header .spacer { flex: 1; }
+  header .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  #gstatus { color: var(--muted); }
+
+  main { max-width: 1160px; margin: 0 auto; padding: 18px 28px 60px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 40px; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; gap: 28px; } }
+
+  .notices { grid-column: 1 / -1; display: grid; gap: 8px; }
+  .notice { border: 1.5px solid var(--ink); background: var(--wash); padding: 10px 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; border-radius: 0; box-shadow: 4px 4px 0 rgba(0,0,0,0.05); }
+  .notice.soft { border-color: var(--rule); color: var(--muted); box-shadow: none; }
+
+  .filters-row { display: flex; justify-content: space-between; align-items: center; margin: 4px 0 22px; gap: 12px; }
+  .filters-row .chips { margin: 0; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .toggle-overdue { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); cursor: pointer; user-select: none; white-space: nowrap; font-weight: 500; }
+  .toggle-overdue:hover { color: var(--ink); }
+  .toggle-overdue input { cursor: pointer; }
+  .chip { border: 1.5px solid var(--rule); padding: 4px 12px; cursor: pointer; user-select: none; border-radius: 0; background: var(--paper); transition: all 0.2s ease; font-size: 13px; font-weight: 500; }
+  .chip:hover { border-color: var(--ink); background: var(--wash); transform: translateY(-1px); box-shadow: 2px 2px 0 rgba(0,0,0,0.1); }
+  .chip.on { border-color: var(--ink); background: var(--ink); color: var(--paper); box-shadow: 2px 2px 0 rgba(0,0,0,0.15); }
+
+  h2 { font-size: 15px; font-weight: 600; color: var(--muted); margin: 34px 0 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  h2:first-of-type { margin-top: 0; }
+
+  /* Ledger: date rail on the left, items to the right */
+  .day { display: grid; grid-template-columns: 76px minmax(0, 1fr); border-top: 1.5px solid var(--ink); padding: 14px 0; }
+  .day.today { background: var(--wash); margin: 0 -10px; padding-left: 10px; padding-right: 10px; border-radius: 0; }
+  .date { line-height: 1; padding-top: 4px; }
+  .date .wd { display: block; font-size: 13px; color: var(--muted); margin-bottom: 2px; }
+  .date .num { display: block; font-size: 42px; font-weight: 800; letter-spacing: -0.03em; color: var(--ink); }
+  .date .mo { display: block; font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .items { display: grid; }
+  .item { display: grid; grid-template-columns: 22px 92px minmax(0, 1fr) auto auto; gap: 10px; align-items: baseline; padding: 10px 12px; margin: 0 -12px; border-radius: 0; transition: all 0.2s ease; border: 1.5px solid transparent; }
+  .item:hover { background: var(--wash); border-color: var(--rule); transform: translateX(2px); box-shadow: -2px 2px 0 rgba(0,0,0,0.05); }
+  .day.today .item:hover { background: var(--paper); }
+  .glyph { font-size: 15px; line-height: 1; transform: translateY(1px); }
+  .glyph.submitted, .glyph.graded { color: #1a9e4a; }
+  .glyph.graded { font-weight: 700; }
+  .glyph.in_progress { color: #d97706; }
+  .course { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; text-align: right; }
+  .title { min-width: 0; font-weight: 500; }
+  .title a { text-decoration: none; }
+  .title a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .title .flag { font-weight: 700; margin-left: 8px; font-size: 11px; background: #fee; color: #d00; padding: 2px 6px; border-radius: 0; text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle; border: 1.5px solid #d00; }
+  .title .kind { font-weight: 700; margin-right: 6px; }
+  .title .meta { color: var(--muted); font-size: 13px; margin-left: 8px; white-space: nowrap; }
+  .reserve { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--rule); }
+  .reserve .when { color: var(--muted); font-size: 13px; }
+  .item.done .title a { color: var(--muted); text-decoration: line-through; }
+  .item.closed .title a { color: var(--muted); }
+  .time { white-space: nowrap; color: var(--muted); }
+  .time b { color: var(--ink); font-weight: 600; }
+  .grade { white-space: nowrap; color: var(--ink); font-weight: 600; }
+  .item details { display: inline; color: var(--muted); font-size: 14px; }
+  .item details[open] { display: block; margin-top: 4px; white-space: pre-wrap; }
+  .item summary { display: inline; cursor: pointer; list-style: none; margin-left: 8px; white-space: nowrap; }
+  .item summary::-webkit-details-marker { display: none; }
+  .item summary::before { content: "more"; text-decoration: underline; text-underline-offset: 3px; }
+  .item details[open] summary { display: block; margin: 0; }
+  .item details[open] summary::before { content: "less"; }
+
+  .flat .item { border-top: 1px solid var(--rule); margin: 0; padding: 10px 0; border-radius: 0; }
+  .flat .item:first-child { border-top: 1.5px solid var(--ink); }
+  .flat .item:hover { background: transparent; transform: none; box-shadow: none; border-color: transparent; border-top-color: var(--rule); }
+
+  aside section { margin-bottom: 30px; }
+  aside h2 { margin: 0 0 8px; font-weight: 600; }
+  .src { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--rule); }
+  .src:first-child { border-top: 1.5px solid var(--ink); }
+  .src .st { color: var(--muted); display: flex; gap: 8px; align-items: center; }
+  .src button { padding: 2px 8px; font-size: 13px; }
+  .change { padding: 10px 8px; border-top: 1px solid var(--rule); font-size: 14px; margin: 0 -8px; border-radius: 0; transition: background 0.2s ease; border-bottom: 1px solid transparent; border-left: 1px solid transparent; }
+  .change:first-child { border-top: 1.5px solid var(--ink); }
+  .change:hover { background: var(--wash); border-left-color: var(--rule); border-bottom-color: var(--rule); transform: translate(2px, -2px); box-shadow: -4px 4px 0 rgba(0,0,0,0.05); }
+  .change .what { color: var(--muted); }
+  .change .when { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  #log { font-size: 12px; line-height: 1.45; max-height: 240px; overflow: auto; white-space: pre-wrap; color: var(--muted); border-top: 1.5px solid var(--ink); padding-top: 10px; font-family: ui-monospace, monospace; }
+  .empty { color: var(--muted); font-style: italic; font-size: 14px; }
+
+  dialog { background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-radius: 0; width: min(560px, 92vw); padding: 30px; box-shadow: 12px 12px 0 rgba(0,0,0,0.15); }
+  dialog::backdrop { background: rgba(0,0,0,.6); }
+  dialog h2 { color: var(--ink); font-weight: 700; margin: 0 0 12px; text-transform: uppercase; }
+  label { display: block; margin: 14px 0 6px; font-weight: 500; }
+  label small { display: block; color: var(--muted); font-weight: 400; line-height: 1.4; margin-top: 2px; }
+  input, select, textarea { width: 100%; font: inherit; padding: 8px 12px; border: 1.5px solid var(--rule); border-radius: 0; background: var(--paper); color: var(--ink); transition: border-color 0.2s, box-shadow 0.2s; }
+  input:focus, select:focus, textarea:focus { border-color: var(--ink); outline: none; box-shadow: 4px 4px 0 rgba(0,0,0,0.1); }
+  textarea { min-height: 170px; font-size: 13px; resize: vertical; }
+  .err { color: #d00; font-weight: 600; min-height: 1.4em; margin: 10px 0 0; }
+  .pair { display: flex; gap: 8px; }
+  .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* Course Pill Builder */
+  #course-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .course-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--paper); border: 1.5px solid var(--ink); padding: 4px 10px; border-radius: 0; font-size: 13px; box-shadow: 2px 2px 0 rgba(0,0,0,0.1); transition: transform 0.2s; }
+  .course-pill:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 rgba(0,0,0,0.15); }
+  .course-pill strong { font-weight: 600; }
+  .course-pill span { color: var(--muted); font-size: 12px; }
+  .course-pill .del { appearance: none; background: var(--wash); border: 1px solid var(--rule); padding: 0 6px; margin: 0 -4px; color: var(--ink); cursor: pointer; font-size: 14px; box-shadow: none; border-radius: 0; }
+  .course-pill .del:hover { color: var(--paper); transform: none; background: var(--ink); border-color: var(--ink); }
+
+  details.past-bar { margin-top: 34px; border: 1.5px solid var(--ink); border-radius: 0; overflow: hidden; box-shadow: 4px 4px 0 rgba(0,0,0,0.05); }
+  details.past-bar summary { background: var(--wash); padding: 10px 14px; cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  details.past-bar summary::-webkit-details-marker { display: none; }
+  details.past-bar summary::after { content: "▼"; font-size: 11px; color: var(--muted); transition: transform 0.2s; }
+  details.past-bar[open] summary::after { transform: rotate(180deg); }
+  details.past-bar[open] summary { border-bottom: 1.5px solid var(--ink); }
+  details.past-bar #past { padding: 4px 14px 14px; }
+  details.aside-dropdown summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+  details.aside-dropdown summary::-webkit-details-marker { display: none; }
+  details.aside-dropdown summary h2 { margin: 0; }
+  details.aside-dropdown summary::after { content: "▼"; font-size: 11px; color: var(--muted); transition: transform 0.2s; }
+  details.aside-dropdown[open] summary::after { transform: rotate(180deg); }
+  details.aside-dropdown[open] summary { margin-bottom: 8px; }
+
+  /* Skeleton Loading */
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  .skeleton-box {
+    background: #f6f7f8;
+    background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+    background-repeat: no-repeat;
+    background-size: 1000px 100%; 
+    animation: shimmer 2s infinite linear forwards;
+    border-radius: 4px;
+    border: none !important;
+  }
+  .dark-mode .skeleton-box {
+    background: #2a2a2a;
+    background-image: linear-gradient(to right, #2a2a2a 0%, #3a3a3a 20%, #2a2a2a 40%, #2a2a2a 100%);
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>UIUC Collective Mind</h1>
+  <span class="poll" id="pollinfo">Connecting…</span>
+  <span class="spacer"></span>
+  <div class="actions">
+    <span id="gstatus"></span>
+    <button id="gbtn" class="ghost">Connect Google</button>
+    <button id="pull">Pull now</button>
+    <button id="settingsbtn" class="ghost">Settings</button>
+  </div>
+</header>
+<main>
+  <div class="notices" id="banners"></div>
+  
+  <!-- Content (hidden until state loads) -->
+  <section id="content-main" style="display: none;">
+    <div class="filters-row">
+      <div class="chips" id="chips"></div>
+      <label class="toggle-overdue" title="Hide uncompleted overdue assignments from Coming up">
+        <input type="checkbox" id="hide-overdue-toggle">
+        <span>Hide overdue</span>
+      </label>
+    </div>
+    <h2>Coming up</h2>
+    <div id="upcoming"></div>
+    <h2>No due date</h2>
+    <div id="undated" class="flat"></div>
+  </section>
+  <aside id="content-aside" style="display: none;">
+    <section><h2>Exams to reserve</h2><div id="reservable"></div></section>
+    <section><h2>Sources</h2><div id="sources"></div></section>
+    <section>
+      <details class="aside-dropdown">
+        <summary><h2>Past Assignments</h2></summary>
+        <div id="past"></div>
+      </details>
+    </section>
+    <section><h2>Changes</h2><div id="changes"></div></section>
+    <section><h2>Log</h2><div id="log"></div></section>
+  </aside>
+
+  <!-- Skeleton -->
+  <section id="skeleton-main">
+    <div class="skeleton-box" style="width: 30%; height: 28px; margin: 4px 0 22px;"></div>
+    <h2 style="color: transparent; width: 100px;" class="skeleton-box">Coming up</h2>
+    <div class="skeleton-box" style="width: 100%; height: 64px; margin-bottom: 4px;"></div>
+    <div class="skeleton-box" style="width: 100%; height: 64px; margin-bottom: 4px;"></div>
+    <div class="skeleton-box" style="width: 100%; height: 64px; margin-bottom: 4px;"></div>
+    <h2 style="color: transparent; width: 120px; margin-top: 34px;" class="skeleton-box">No due date</h2>
+    <div class="skeleton-box" style="width: 100%; height: 42px; margin-bottom: 2px;"></div>
+    <div class="skeleton-box" style="width: 100%; height: 42px; margin-bottom: 2px;"></div>
+  </section>
+  <aside id="skeleton-aside">
+    <section><h2 style="color: transparent; width: 140px;" class="skeleton-box">Exams to reserve</h2><div class="skeleton-box" style="width: 100%; height: 48px;"></div></section>
+    <section><h2 style="color: transparent; width: 80px;" class="skeleton-box">Sources</h2><div class="skeleton-box" style="width: 100%; height: 80px;"></div></section>
+    <section><h2 style="color: transparent; width: 80px;" class="skeleton-box">Changes</h2><div class="skeleton-box" style="width: 100%; height: 120px;"></div></section>
+  </aside>
+</main>
+<dialog id="settings">
+  <form method="dialog" id="sform">
+    <h2>Settings</h2>
+    <label>Canvas calendar feed URL <small>Canvas &rarr; Calendar &rarr; Calendar Feed &rarr; copy the link. This is how Canvas due dates are read. Keep it secret. Leave blank to keep the current one.</small></label>
+    <input name="canvasFeedUrl" autocomplete="off" placeholder="https://canvas.illinois.edu/feeds/calendars/user_....ics">
+    <label>Pull every (minutes)</label><input name="pollMinutes" type="number" min="5" max="720">
+    <label>Show Google tasks this many days before the deadline <small>The task moves forward each day while it is still open &mdash; past the deadline too, until the work is in.</small></label><input name="taskLeadDays" type="number" min="0" max="30">
+    <label>Evening block <small>Start and end hour (0&ndash;23, America/Chicago) of the homework block put on your Google Calendar.</small></label>
+    <div class="pair"><input name="blockStartHour" type="number" min="0" max="23"><input name="blockEndHour" type="number" min="0" max="23"></div>
+    <label>Block assignments due within (hours) <small>How close a deadline has to be before its evening block appears.</small></label><input name="blockWithinHours" type="number" min="1" max="72">
+    <label>Google client ID <small>Built-in desktop client is used by default. Only fill these to use a custom Google Cloud project.</small></label><input name="clientId" autocomplete="off" placeholder="Built-in desktop client">
+    <label>Google client secret <small>Optional for PKCE desktop login; leave blank unless using a custom web client.</small></label><input name="clientSecret" type="password" autocomplete="off" placeholder="Optional">
+    <label>Courses <small>One entry per source. Edit for a new term.</small></label>
+    <div id="course-pills"></div>
+    <div class="pair" style="align-items: stretch;">
+      <input id="add-course-name" placeholder="Course Name (e.g. CS 128)" style="flex: 1;" autocomplete="off">
+      <select id="add-course-source" style="flex: 1;">
+        <option value="canvas">Canvas</option>
+        <option value="prairielearn">PrairieLearn</option>
+        <option value="smartphysics">SmartPhysics</option>
+        <option value="cs128">CS 128</option>
+        <option value="prairietest">PrairieTest</option>
+      </select>
+      <input id="add-course-id" placeholder="Course ID" style="flex: 1;" autocomplete="off">
+      <button type="button" id="add-course-btn" class="ghost" style="white-space: nowrap;">Add</button>
+    </div>
+    <p class="err" id="serr"></p>
+    <div class="dialog-actions"><button type="button" id="scancel" class="ghost">Cancel</button><button id="ssave">Save changes</button></div>
+  </form>
+</dialog>
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const safeUrl = (u) => (/^https?:\/\//i.test(String(u ?? "")) ? u : "#");
+const TZ = "America/Chicago";
+const fmtTime = (iso) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(new Date(iso));
+const fmtDay = (iso) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric" }).format(new Date(iso));
+const parts = (iso) => Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "2-digit" }).formatToParts(new Date(iso)).map((p) => [p.type, p.value]));
+const dayKey = (iso) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(iso));
+const rel = (iso) => { const d = (new Date(iso) - Date.now()) / 36e5; if (Math.abs(d) < 1) return `${Math.round(d * 60)} min`; if (Math.abs(d) < 48) return `${Math.round(d)} h`; return `${Math.round(d / 24)} d`; };
+// A check mark for work that is in: hollow once turned in, bold once graded.
+const GLYPH = { open: "○", submitted: "✓", graded: "✓", closed: "⊘", unknown: "○", in_progress: "◐" };
+const GLYPH_TITLE = { open: "not turned in", submitted: "turned in, not graded yet", graded: "graded", closed: "closed", unknown: "status unknown", in_progress: "in progress" };
+// A CBTF reservation is a place to be at a time, not work to hand in: it is
+// marked [Test], and its first details line (duration · room) shows inline.
+const isTest = (a) => a.source === "prairietest";
+const testMark = (a) => (isTest(a) ? `<span class="kind">[Test]</span>` : "");
+const testMeta = (a) => (isTest(a) && a.details ? `<span class="meta">${esc(a.details.split("\n")[0])}</span>` : "");
+let state = null; let filter = null;
+try { filter = JSON.parse(localStorage.getItem("filter") || "null"); } catch {}
+let hideOverdue = false;
+try { hideOverdue = localStorage.getItem("hideOverdue") === "true"; } catch {}
+
+function render() {
+  if (!state) return;
+  
+  // Hide skeleton, show content
+  const sm = $("#skeleton-main"); if (sm) sm.style.display = "none";
+  const sa = $("#skeleton-aside"); if (sa) sa.style.display = "none";
+  const cm = $("#content-main"); if (cm) cm.style.display = "block";
+  const ca = $("#content-aside"); if (ca) ca.style.display = "block";
+
+  const overdueToggle = $("#hide-overdue-toggle");
+  if (overdueToggle) {
+    overdueToggle.checked = hideOverdue;
+    overdueToggle.onchange = (e) => {
+      hideOverdue = Boolean(e.target.checked);
+      try { localStorage.setItem("hideOverdue", hideOverdue ? "true" : "false"); } catch {}
+      render();
+    };
+  }
+
+  // PrairieTest is one login for every course's CBTF exams; each reservation
+  // carries its own course, so the entry itself is not a chip.
+  const courses = [...new Set(state.settings.courses.filter((c) => c.source !== "prairietest").map((c) => c.course))];
+  if (filter && !courses.includes(filter)) filter = null;
+  $("#chips").innerHTML = [`<span class="chip ${filter ? "" : "on"}" tabindex="0" data-c="">All courses</span>`, ...courses.map((c) => `<span class="chip ${filter === c ? "on" : ""}" tabindex="0" data-c="${esc(c)}">${esc(c)}</span>`)].join("");
+  const items = state.assignments.filter((a) => !filter || a.course === filter);
+  const now = Date.now();
+  const todayKey = dayKey(new Date().toISOString());
+  const getScore = (a) => {
+    if (a.grade) return a.grade;
+    if (a.details) {
+      const m = a.details.match(/Score:?\s+([\d.]+(?:\s*\/\s*[\d.]+(?:\s*\([\d.]+%\))?|%))/i);
+      if (m) return m[1];
+    }
+    return null;
+  };
+  const parsePercent = (grade) => {
+    if (!grade) return null;
+    let m = grade.match(/([\d.]+)\s*%/);
+    if (m) return Math.min(100, Math.max(0, parseFloat(m[1])));
+    m = grade.match(/([\d.]+)\s*\/\s*([\d.]+)/);
+    if (m && parseFloat(m[2]) > 0) return Math.min(100, Math.max(0, (parseFloat(m[1]) / parseFloat(m[2])) * 100));
+    return null;
+  };
+  // Overdue work: past due and uncompleted (e.g. 0/100, 0%, or open with no score).
+  // Completed/graded work with empty score (like pending instructor reviews) is not overdue.
+  const isOverdue = (a) => {
+    if (!a.dueAt || Date.parse(a.dueAt) >= now) return false;
+    const score = getScore(a);
+    const pct = parsePercent(score);
+    if (pct !== null && pct > 0) return false;
+    if (pct !== null && pct === 0) return true;
+    return a.status === "open" || a.status === "unknown";
+  };
+  let upcoming = items.filter((a) => a.dueAt && (Date.parse(a.dueAt) >= now || isOverdue(a))).sort((a, b) => Date.parse(a.dueAt) - Date.parse(b.dueAt));
+  if (hideOverdue) {
+    upcoming = upcoming.filter((a) => !isOverdue(a));
+  }
+  const past = items.filter((a) => a.dueAt && Date.parse(a.dueAt) < now && !isOverdue(a)).sort((a, b) => Date.parse(b.dueAt) - Date.parse(a.dueAt)).slice(0, 60);
+  const undated = items.filter((a) => !a.dueAt).sort((a, b) => a.course.localeCompare(b.course) || a.title.localeCompare(b.title));
+
+  const row = (a) => {
+    const rawGrade = getScore(a);
+    let pct = parsePercent(rawGrade);
+    let st = a.status;
+    if ((st === "submitted" || st === "open") && pct !== null && pct > 0 && pct < 100) {
+      st = "in_progress";
+    }
+    const overdue = isOverdue(a);
+    const cls = overdue ? "overdue" : (st === "graded" || st === "submitted" || st === "in_progress") ? "done" : st === "closed" ? "closed" : "";
+    const gradeStyle = pct !== null ? ` style="background: hsl(${Math.round(pct * 1.2)}, 70%, 85%); padding: 1px 6px; border-radius: 4px;"` : "";
+    const displayGrade = rawGrade ? rawGrade.replace(/^[\d.]+\/[\d.]+\s*\(([\d.]+%)\)$/, "$1") : "";
+    const glyphCls = overdue ? "overdue" : esc(st);
+    const glyphTitle = overdue ? "Overdue" : (GLYPH_TITLE[st] ?? st);
+    const glyphSymbol = overdue ? "○" : (GLYPH[st] ?? "○");
+    return `<div class="item ${cls}">
+      <span class="glyph ${glyphCls}" title="${esc(glyphTitle)}">${glyphSymbol}</span>
+      <span class="course" title="${esc(a.course)}">${esc(a.course)}</span>
+      <span class="title">${testMark(a)}<a href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener">${esc(a.title)}</a>${testMeta(a)}${overdue ? `<span class="flag">overdue</span>` : ""}${a.details ? `<details><summary></summary>${esc(a.details)}</details>` : ""}</span>
+      <span class="time">${a.dueAt ? `<b>${fmtTime(a.dueAt)}</b> ${rel(a.dueAt)}` : ""}</span>
+      <span class="grade"${rawGrade ? ` title="${esc(`grade: ${rawGrade}`)}"` : ""}${gradeStyle}>${esc(displayGrade)}</span>
+    </div>`;
+  };
+  const groups = (list) => {
+    const g = new Map();
+    for (const a of list) { const k = isOverdue(a) ? todayKey : dayKey(a.dueAt); if (!g.has(k)) g.set(k, []); g.get(k).push(a); }
+    return [...g.entries()].map(([k, arr]) => { const p = parts(k === todayKey ? new Date().toISOString() : arr[0].dueAt); return `<div class="day ${k === todayKey ? "today" : ""}">
+      <div class="date"><span class="wd">${k === todayKey ? "Today" : esc(p.weekday)}</span><span class="num">${esc(p.day)}</span><span class="mo">${esc(p.month)}</span></div>
+      <div class="items">${arr.map(row).join("")}</div></div>`; }).join("");
+  };
+  const pastRow = (a) => {
+    const rawGrade = getScore(a);
+    let pct = parsePercent(rawGrade);
+    let st = a.status;
+    if ((st === "submitted" || st === "open") && pct !== null && pct > 0 && pct < 100) st = "in_progress";
+    const overdue = isOverdue(a);
+    const cls = overdue ? "overdue" : (st === "graded" || st === "submitted" || st === "in_progress") ? "done" : st === "closed" ? "closed" : "";
+    const gradeStyle = pct !== null ? ` style="background: hsl(${Math.round(pct * 1.2)}, 70%, 85%); padding: 2px 6px; border-radius: 4px; font-weight: 500;"` : "";
+    const displayGrade = rawGrade ? rawGrade.replace(/^[\d.]+\/[\d.]+\s*\(([\d.]+%)\)$/, "$1") : "";
+    return `<div class="change item ${cls}" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+      <div style="min-width: 0; display: flex; flex-direction: column; gap: 2px;">
+        <div style="font-weight: 700; color: var(--ink); line-height: 1.2;">${esc(a.course)}</div>
+        <div class="title" style="line-height: 1.3;">${testMark(a)}<a href="${esc(safeUrl(a.url))}" target="_blank" rel="noopener" style="text-decoration: none;">${esc(a.title)}</a>${overdue ? `<span class="flag">overdue</span>` : ""}</div>
+        <div class="when" style="line-height: 1.2;">${a.dueAt ? esc(fmtDay(a.dueAt)) + " " + esc(fmtTime(a.dueAt)) : ""}</div>
+      </div>
+      <div class="grade"${gradeStyle}>${esc(displayGrade)}</div>
+    </div>`;
+  };
+  $("#upcoming").innerHTML = upcoming.length ? groups(upcoming) : `<p class="empty">Nothing due. Pull now to check again.</p>`;
+  $("#past").innerHTML = past.length ? past.map(pastRow).join("") : `<p class="empty">No past assignments.</p>`;
+  $("#undated").innerHTML = undated.length ? undated.map(row).join("") : `<p class="empty">Everything has a date.</p>`;
+
+  const src = Object.entries(state.sources).filter(([k]) => !k.startsWith("google"));
+  const srcName = (k) => k.replace(/^prairielearn:/, "PrairieLearn ").replace(/^canvas:/, "Canvas ").replace(/^cs128$/, "cs128.org").replace(/^prairietest$/, "PrairieTest");
+  // Exams you can book a CBTF slot for. The window's `end` is exclusive
+  // (00:00 of the day after), so the last day shown is one minute before it.
+  const reservable = state.sources.prairietest?.reservable ?? [];
+  const lastDay = (iso) => fmtDay(new Date(Date.parse(iso) - 60_000).toISOString());
+  $("#reservable").innerHTML = reservable.map((r) => `<div class="reserve"><span><b>${esc(r.course)}</b> ${esc(r.title)}<br><span class="when">${r.start ? esc(fmtDay(r.start)) : ""}${r.end ? ` to ${esc(lastDay(r.end))}` : ""}</span></span><a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">Reserve</a></div>`).join("") || `<p class="empty">Nothing to reserve.</p>`;
+  // An error that reads like an expired session gets the same login affordance
+  // as an explicit needs_login (some failures only surface as a 401/403 text).
+  const needsLogin = (s) => s.state === "needs_login" || (s.state === "error" && /login|session|40[13]/i.test(s.message ?? ""));
+  // With a calendar feed configured, Canvas due dates already arrived without a
+  // login: a missing session only costs submitted/graded status, so it is a
+  // soft note with an optional login, not a blocking one. This is exactly the
+  // degraded-but-ok case the poller reports — never a real failure.
+  const hasFeed = !!state.settings.canvasFeedUrl;
+  const statusOnly = (k, s) => k.startsWith("canvas:") && s.state === "ok" && /status via login unavailable/.test(s.message ?? "");
+  // A Canvas source reading due dates from the feed can only fail on the feed
+  // itself, and no login fixes a bad feed URL — so its errors stay plain errors
+  // even when the message reads like a 401 (e.g. "Canvas feed 401").
+  const canLogIn = (k, s) => statusOnly(k, s) || (needsLogin(s) && !(hasFeed && k.startsWith("canvas:") && s.state !== "needs_login"));
+  const stText = (s) => s.state === "ok" ? `${s.count} items` : s.state === "needs_login" ? "needs login" : "error";
+  $("#sources").innerHTML = src.map(([k, s]) => `<div class="src"><span>${esc(srcName(k))}</span><span class="st" title="${esc(s.message)}">${stText(s)}${canLogIn(k, s) ? ` <button data-login="${esc(k)}">Log in</button>` : ""}</span></div>`).join("") || `<p class="empty">Nothing pulled yet.</p>`;
+  const g = state.sources.google;
+  const gc = state.sources.googleCalendar;
+  // Every source failing for the same networking reason is one fact — this
+  // machine has no internet — not one failure per course, and nothing here is
+  // fixable by logging in or re-reading a feed.
+  const NET_ERR = /ERR_INTERNET_DISCONNECTED|fetch failed|ENOTFOUND|ECONNRESET|net::ERR_/;
+  const offline = src.length > 0 && src.every(([, s]) => s.state === "error" && NET_ERR.test(s.message ?? ""));
+  const banners = [];
+  // No courses configured at all → prompt the user to open Settings.
+  const configuredCourses = state.settings?.courses ?? [];
+  if (configuredCourses.length === 0) {
+    banners.push(`<div class="notice"><b>No courses added yet.</b> Open <button id="settings-shortcut">Settings</button> to add your courses and a Canvas feed URL.</div>`);
+  } else if (offline) {
+    banners.push(`<div class="notice soft">Offline — showing what was pulled ${state.lastPoll ? `at ${esc(fmtTime(state.lastPoll))}` : "earlier"}</div>`);
+  } else {
+    const statusOnlyKeys = src.filter(([k, s]) => statusOnly(k, s)).map(([k]) => k);
+    if (statusOnlyKeys.length) banners.push(`<div class="notice soft"><b>Canvas</b> due dates are loading from your calendar feed. Log in to Canvas to also see submitted &amp; graded status. <button data-login="${esc(statusOnlyKeys[0])}">Open Canvas login</button></div>`);
+    for (const [k, s] of src) {
+      if (needsLogin(s) && !statusOnly(k, s) && canLogIn(k, s)) {
+        banners.push(`<div class="notice"><b>${esc(srcName(k))}</b> needs you to log in to load assignments. <button data-login="${esc(k)}">Open login window</button> <span class="empty">Then pull again.</span></div>`);
+      }
+    }
+    for (const [k, s] of src) {
+      if (s.state === "error" && !(needsLogin(s) && canLogIn(k, s))) {
+        // Produce a human-friendly error without leaking raw stack traces.
+        let msg = s.message ?? "unknown error";
+        // Trim very long Canvas SAML-style URLs out of login errors.
+        if (msg.length > 200) msg = msg.slice(0, 200) + "…";
+        banners.push(`<div class="notice"><b>${esc(srcName(k))}</b> could not be read: ${esc(msg)}</div>`);
+      }
+    }
+    if (g?.state === "error") {
+      const taskMsg = /insufficient.*scope/i.test(g.message ?? "")
+        ? "Google Tasks requires permission. Reconnect Google in Settings."
+        : g.message;
+      banners.push(`<div class="notice">Google Tasks could not be updated: ${esc(taskMsg)}</div>`);
+    }
+    if (gc?.state === "error") banners.push(`<div class="notice">Calendar blocks could not be updated: ${esc(gc.message)}</div>`);
+  }
+  if (!state.google.connected) banners.push(`<div class="notice soft">Google Tasks is not connected. Connect it to sync assignments as tasks.</div>`);
+  $("#banners").innerHTML = banners.join("");
+  // Wire up the settings shortcut button inside the banner (rendered fresh each time).
+  const shortcut = $("#settings-shortcut");
+  if (shortcut) shortcut.onclick = () => { $("#serr").textContent = ""; openSettings(); };
+
+  const label = { added: "added", removed: "removed", due_changed: "due date moved", status_changed: "status changed" };
+  const f = (v) => (v && /^\d{4}-/.test(v) ? `${fmtDay(v)} ${fmtTime(v)}` : v ?? "none");
+  // "submitted to graded: 9/10" — the grade rides on the status change.
+  const to = (c) => (c.type === "status_changed" && c.grade ? `${f(c.to)}: ${c.grade}` : f(c.to));
+  $("#changes").innerHTML = state.changes.slice(0, 40).map((c) => `<div class="change"><div><b>${esc(c.course)}</b> ${esc(c.title)}</div><div class="what">${label[c.type] ?? esc(c.type)}${c.type === "due_changed" || c.type === "status_changed" ? `: ${esc(f(c.from))} to ${esc(to(c))}` : c.to ? `, due ${esc(f(c.to))}` : ""}</div><div class="when">${esc(fmtDay(c.at))} ${esc(fmtTime(c.at))}</div></div>`).join("") || `<p class="empty">No changes yet.</p>`;
+
+  $("#pollinfo").textContent = state.polling ? "Pulling…" : (state.lastPoll ? `Pulled ${fmtTime(state.lastPoll)}` : "Not pulled yet") + (state.nextPoll ? `, next ${fmtTime(state.nextPoll)}` : "");
+  const gstatus = [];
+  if (state.google.connected) {
+    gstatus.push(g?.message ? `Google Tasks synced (${g.message.replace(/^tasks: /, "")})` : "Google Tasks connected");
+    if (gc) gstatus.push(gc.state === "ok" ? `Calendar blocks ok (${gc.message.replace(/^blocks: /, "")})` : "Calendar blocks failing");
+  }
+  $("#gstatus").textContent = gstatus.join(" · ");
+  $("#gbtn").textContent = state.google.connected ? "Disconnect Google" : "Connect Google";
+  renderLog();
+}
+function renderLog() { if (!state) return; $("#log").textContent = state.log.slice(-80).map((l) => `${l.at.slice(11, 19)}  ${l.msg}`).join("\n"); $("#log").scrollTop = 1e9; }
+
+document.addEventListener("click", async (e) => {
+  const chip = e.target.closest(".chip"); if (chip) { filter = chip.dataset.c || null; try { localStorage.setItem("filter", JSON.stringify(filter)); } catch {} render(); return; }
+  const login = e.target.closest("[data-login]"); if (login) { await fetch(`/api/login/${encodeURIComponent(login.dataset.login)}`, { method: "POST" }); return; }
+});
+
+let currentCourses = [];
+function renderCourses() {
+  const container = $("#course-pills");
+  if (!container) return;
+  container.innerHTML = "";
+  currentCourses.forEach((c, i) => {
+    const idKey = c.source === "prairielearn" ? "instanceId" : c.source === "smartphysics" ? "enrollmentId" : c.source === "canvas" ? "courseId" : null;
+    const idDisplay = idKey ? `<span>${c.source}: ${esc(c[idKey])}</span>` : `<span>${c.source}</span>`;
+    container.innerHTML += `<div class="course-pill"><strong>${esc(c.course)}</strong> ${idDisplay} <button type="button" class="del" data-idx="${i}">&times;</button></div>`;
+  });
+}
+
+$("#course-pills")?.addEventListener("click", (e) => {
+  if (e.target.classList.contains("del")) {
+    currentCourses.splice(parseInt(e.target.dataset.idx, 10), 1);
+    renderCourses();
+  }
+});
+
+const placeholders = { canvas: "Course ID", prairielearn: "Instance ID", smartphysics: "Enrollment ID", cs128: "No ID needed", prairietest: "No ID needed" };
+
+$("#add-course-source")?.addEventListener("change", (e) => {
+  const source = e.target.value;
+  const input = $("#add-course-id");
+  input.placeholder = placeholders[source] || "Course ID";
+  if (source === "cs128" || source === "prairietest") { input.value = ""; input.disabled = true; } else { input.disabled = false; }
+});
+
+$("#add-course-btn")?.addEventListener("click", () => {
+  const course = $("#add-course-name").value.trim();
+  const source = $("#add-course-source").value;
+  const idValue = $("#add-course-id").value.trim();
+  if (!course) { $("#serr").textContent = "Course Name is required."; return; }
+  const newCourse = { course, source };
+  if (source === "prairielearn") { if(!idValue) { $("#serr").textContent = "Instance ID is required."; return; } newCourse.instanceId = idValue; }
+  else if (source === "smartphysics") { if(!idValue) { $("#serr").textContent = "Enrollment ID is required."; return; } newCourse.enrollmentId = idValue; }
+  else if (source === "canvas") { if(!idValue) { $("#serr").textContent = "Course ID is required."; return; } newCourse.courseId = idValue; }
+  $("#serr").textContent = "";
+  currentCourses.push(newCourse);
+  renderCourses();
+  $("#add-course-name").value = "";
+  $("#add-course-id").value = "";
+});
+
+document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.classList?.contains("chip")) e.target.click(); });
+$("#pull").onclick = () => fetch("/api/poll", { method: "POST" });
+$("#gbtn").onclick = async () => {
+  if (!state) return;
+  if (state.google.connected) { await fetch("/api/google/disconnect", { method: "POST" }); return; }
+  const r = await fetch("/api/google/connect"); const b = await r.json();
+  if (!r.ok) { $("#serr").textContent = b.error; openSettings(); return; }
+  location.href = b.url;
+};
+function openSettings() {
+  if (!state) return;
+  const f = $("#sform").elements; f.pollMinutes.value = state.settings.pollMinutes; f.taskLeadDays.value = state.settings.taskLeadDays ?? 3; f.blockStartHour.value = state.settings.blockStartHour ?? 20; f.blockEndHour.value = state.settings.blockEndHour ?? 23; f.blockWithinHours.value = state.settings.blockWithinHours ?? 24;
+  const curCid = state.settings.google?.clientId;
+  const isBuiltIn = !curCid || curCid === "desktop-client.apps.googleusercontent.com" || curCid === "legacy-repo-owner.apps.googleusercontent.com";
+  f.clientId.value = isBuiltIn ? "" : curCid; f.canvasFeedUrl.value = ""; f.clientSecret.value = "";
+  currentCourses = JSON.parse(JSON.stringify(state.settings.courses));
+  renderCourses();
+  $("#settings").showModal();
+}
+$("#settingsbtn").onclick = () => { $("#serr").textContent = ""; openSettings(); };
+$("#scancel").onclick = () => $("#settings").close();
+$("#sform").onsubmit = async (e) => {
+  e.preventDefault(); const f = e.target.elements; const patch = { pollMinutes: Number(f.pollMinutes.value), taskLeadDays: Number(f.taskLeadDays.value), blockStartHour: Number(f.blockStartHour.value), blockEndHour: Number(f.blockEndHour.value), blockWithinHours: Number(f.blockWithinHours.value), google: { clientId: f.clientId.value } };
+  if (f.canvasFeedUrl.value) patch.canvasFeedUrl = f.canvasFeedUrl.value.trim();
+  if (f.clientSecret.value) patch.google.clientSecret = f.clientSecret.value;
+  patch.courses = currentCourses;
+  const r = await fetch("/api/settings", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(patch) });
+  if (!r.ok) { $("#serr").textContent = (await r.json()).error; return; }
+  $("#settings").close();
+};
+
+function connect() {
+  const es = new EventSource("/api/events");
+  es.addEventListener("state", (e) => { state = JSON.parse(e.data); render(); });
+  es.addEventListener("log", (e) => { if (!state) return; state.log.push(JSON.parse(e.data)); renderLog(); });
+  es.onerror = () => { es.close(); $("#pollinfo").textContent = "Reconnecting…"; setTimeout(connect, 2000); };
+}
+connect();
+setInterval(render, 60_000);
+</script>
+</body>
+</html>
