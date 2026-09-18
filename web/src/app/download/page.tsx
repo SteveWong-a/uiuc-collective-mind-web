@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-const REPO_URL = "https://github.com/axion66/uiuc_collective_mind";
+const REPO_URL = "https://github.com/SteveWong-a/uiuc-collective-mind-web";
 const MAC_DOWNLOAD_URL = `${REPO_URL}/releases/latest/download/UIUC.Collective.Mind-0.1.0-arm64.dmg`;
 const WIN_DOWNLOAD_URL = `${REPO_URL}/releases/latest/download/UIUC.Collective.Mind.Setup.0.1.0.exe`;
 const RELEASES_URL = `${REPO_URL}/releases`;

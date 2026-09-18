@@ -3,7 +3,7 @@
 import { useAuth } from "@/lib/auth-context";
 
 export default function LoginPage() {
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, signInWithGoogleRedirect, error, clearError } = useAuth();
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--color-paper)] px-6">
@@ -20,10 +20,34 @@ export default function LoginPage() {
           <h1 className="text-[22px] font-[800] tracking-tight m-0">UIUC Collective Mind</h1>
         </div>
 
-        <p className="text-[var(--color-muted)] text-[15px] mb-8 mt-3 leading-relaxed">
+        <p className="text-[var(--color-muted)] text-[15px] mb-6 mt-3 leading-relaxed">
           Track your assignments, grades, and deadlines across Canvas, PrairieLearn, SmartPhysics, and more — all in one
           place.
         </p>
+
+        {error && (
+          <div className="mb-6 p-4 border border-[var(--color-red)] bg-[rgba(239,68,68,0.08)] text-[13px] text-[var(--color-ink)] rounded leading-relaxed">
+            <div className="font-[700] text-[var(--color-red)] mb-1 flex items-center justify-between">
+              <span>Sign-in Error</span>
+              <button
+                onClick={clearError}
+                className="text-[var(--color-muted)] hover:text-[var(--color-ink)] text-[14px] cursor-pointer"
+                title="Dismiss"
+              >
+                ✕
+              </button>
+            </div>
+            <div>{error}</div>
+            <div className="mt-3 pt-2 border-t border-[rgba(239,68,68,0.2)]">
+              <button
+                onClick={signInWithGoogleRedirect}
+                className="underline font-[600] text-[var(--color-ink)] hover:text-black cursor-pointer"
+              >
+                Try Redirect Sign-In instead →
+              </button>
+            </div>
+          </div>
+        )}
 
         <button
           onClick={signInWithGoogle}
@@ -56,7 +80,16 @@ export default function LoginPage() {
           Sign in with Google
         </button>
 
-        <p className="text-[12px] text-[var(--color-muted)] mt-6 text-center leading-relaxed">
+        <div className="mt-3 text-center">
+          <button
+            onClick={signInWithGoogleRedirect}
+            className="text-[12px] text-[var(--color-muted)] hover:text-[var(--color-ink)] underline cursor-pointer bg-transparent border-0"
+          >
+            Trouble with popups? Use redirect sign-in
+          </button>
+        </div>
+
+        <p className="text-[12px] text-[var(--color-muted)] mt-5 text-center leading-relaxed">
           Use your <strong>@illinois.edu</strong> or personal Google account.
           <br />
           Your data stays private and encrypted.

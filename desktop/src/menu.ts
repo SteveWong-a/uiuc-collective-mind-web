@@ -111,7 +111,7 @@ export function setupAppMenu(
         {
           label: 'UIUC Collective Mind GitHub',
           click: async () => {
-            await shell.openExternal('https://github.com/uiucDavid/uiuc_collective_mind');
+            await shell.openExternal('https://github.com/SteveWong-a/uiuc-collective-mind-web');
           }
         }
       ]

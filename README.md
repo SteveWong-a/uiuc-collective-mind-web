@@ -29,8 +29,8 @@ files that are never committed (`settings.json`, `profile/`, `data/`). To use it
 
 Install [Node.js](https://nodejs.org) 20+ (LTS installer is fine), then in Terminal:
 
-    git clone https://github.com/axion66/uiuc_collective_mind.git
-    cd uiuc_collective_mind
+    git clone https://github.com/SteveWong-a/uiuc-collective-mind-web.git
+    cd uiuc-collective-mind-web
     npm install
     npx playwright install chromium
     bash scripts/install-launchagent.sh     # starts now, at every login, and after crashes (no sudo)

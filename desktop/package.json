@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "description": "UIUC Collective Mind Desktop App",
   "author": "UIUC Collective Mind Contributors",
-  "homepage": "https://github.com/uiucDavid/uiuc_collective_mind",
+  "homepage": "https://github.com/SteveWong-a/uiuc-collective-mind-web",
   "repository": {
     "type": "git",
-    "url": "https://github.com/uiucDavid/uiuc_collective_mind.git"
+    "url": "https://github.com/SteveWong-a/uiuc-collective-mind-web.git"
   },
   "license": "MIT",
   "main": "dist/main.js",
