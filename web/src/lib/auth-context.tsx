@@ -14,35 +14,53 @@ import { auth } from "@/lib/firebase";
 
 interface AuthContextType {
   user: User | null;
+  isGuest: boolean;
   loading: boolean;
   error: string | null;
   signInWithGoogle: () => Promise<void>;
   signInWithGoogleRedirect: () => Promise<void>;
+  loginAsGuest: () => void;
+  exitGuest: () => void;
   logout: () => Promise<void>;
   clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  isGuest: false,
   loading: true,
   error: null,
   signInWithGoogle: async () => {},
   signInWithGoogleRedirect: async () => {},
+  loginAsGuest: () => {},
+  exitGuest: () => {},
   logout: async () => {},
   clearError: () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isGuest, setIsGuest] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedGuest = sessionStorage.getItem("uiuc_cmind_guest");
+      if (storedGuest === "true") {
+        setIsGuest(true);
+      }
+    }
+
     // Check if user is returning from a redirect sign-in flow
     getRedirectResult(auth)
       .then((result) => {
         if (result?.user) {
           setUser(result.user);
+          setIsGuest(false);
+          if (typeof window !== "undefined") {
+            sessionStorage.removeItem("uiuc_cmind_guest");
+          }
         }
       })
       .catch((err: any) => {
@@ -52,6 +70,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
+      if (u) {
+        setIsGuest(false);
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("uiuc_cmind_guest");
+        }
+      }
       setLoading(false);
     });
     return unsubscribe;
@@ -102,8 +126,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const loginAsGuest = () => {
+    setIsGuest(true);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("uiuc_cmind_guest", "true");
+    }
+  };
+
+  const exitGuest = () => {
+    setIsGuest(false);
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("uiuc_cmind_guest");
+    }
+  };
+
   const logout = async () => {
     setError(null);
+    setIsGuest(false);
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("uiuc_cmind_guest");
+    }
     await signOut(auth);
   };
 
@@ -113,10 +155,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
+        isGuest,
         loading,
         error,
         signInWithGoogle,
         signInWithGoogleRedirect,
+        loginAsGuest,
+        exitGuest,
         logout,
         clearError,
       }}

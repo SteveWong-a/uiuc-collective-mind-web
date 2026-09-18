@@ -1,22 +1,22 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
-import LoginPage from "@/components/login-page";
+import LandingPage from "@/components/landing-page";
 import Dashboard from "@/components/dashboard";
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const { user, isGuest, loading } = useAuth();
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[var(--color-paper)]">
-        <div className="text-[var(--color-muted)] text-lg">Loading…</div>
+        <div className="text-[var(--color-muted)] text-lg font-medium">Loading UIUC Collective Mind…</div>
       </div>
     );
   }
 
-  if (!user) {
-    return <LoginPage />;
+  if (!user && !isGuest) {
+    return <LandingPage />;
   }
 
   return <Dashboard />;

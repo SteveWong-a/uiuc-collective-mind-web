@@ -19,6 +19,7 @@ import SettingsDialog from "@/components/settings-dialog";
 import OnboardingDialog from "@/components/onboarding-dialog";
 import Link from "next/link";
 import ExtensionGuideDialog from "@/components/extension-guide-dialog";
+import LoginDialog from "@/components/login-dialog";
 import { Assignment } from "@/lib/schemas";
 
 type Toast = { id: string; message: string; type: "success" | "error" | "info" };
@@ -164,8 +165,73 @@ function AssignmentRow({ a }: { a: Assignment }) {
   );
 }
 
+const GUEST_SAMPLE_ASSIGNMENTS: Assignment[] = [
+  {
+    id: "guest-1",
+    course: "CS 173",
+    title: "Homework 4: Inductive Proofs & Graph Coloring",
+    dueAt: new Date(Date.now() + 6 * 36e5).toISOString(),
+    status: "open",
+    grade: null,
+    url: "https://us.prairielearn.com",
+    source: "prairielearn",
+  },
+  {
+    id: "guest-2",
+    course: "PHYS 211",
+    title: "Prelecture 6: Rotational Dynamics & Torque",
+    dueAt: new Date(Date.now() - 2 * 36e5).toISOString(),
+    status: "graded",
+    grade: "100%",
+    url: "https://smartphysics.com",
+    source: "smartphysics",
+  },
+  {
+    id: "guest-3",
+    course: "CS 128",
+    title: "Machine Problem 2: Circular Doubly-Linked Lists",
+    dueAt: new Date(Date.now() + 28 * 36e5).toISOString(),
+    status: "open",
+    grade: null,
+    url: "https://cs128.org",
+    source: "cs128",
+  },
+  {
+    id: "guest-4",
+    course: "PrairieTest",
+    title: "[Test] Quiz 2: Trees, Graphs, and Asymptotics",
+    dueAt: new Date(Date.now() + 52 * 36e5).toISOString(),
+    status: "open",
+    grade: null,
+    url: "https://prairietest.com",
+    source: "prairietest",
+    details: "50 min · Grainger Library 057 CBTF",
+  },
+  {
+    id: "guest-5",
+    course: "MATH 241",
+    title: "Written Homework 3: Vector Calculus",
+    dueAt: new Date(Date.now() + 72 * 36e5).toISOString(),
+    status: "submitted",
+    grade: null,
+    url: "https://canvas.illinois.edu",
+    source: "canvas",
+  },
+  {
+    id: "guest-6",
+    course: "CS 173",
+    title: "Exam 1 Practice Assessment",
+    dueAt: new Date(Date.now() - 36 * 36e5).toISOString(),
+    status: "graded",
+    grade: "96%",
+    url: "https://us.prairielearn.com",
+    source: "prairielearn",
+  },
+];
+
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user, isGuest, exitGuest, logout } = useAuth();
+  const [loginOpen, setLoginOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [extensionGuideOpen, setExtensionGuideOpen] = useState(false);
@@ -235,13 +301,30 @@ export default function Dashboard() {
       }
     };
 
+    if (isGuest) {
+      setAssignments((prev) => (prev.length > 0 ? prev : GUEST_SAMPLE_ASSIGNMENTS));
+      setAppSettings({
+        courses: [
+          { source: "prairielearn", course: "CS 173", instanceId: "148201" },
+          { source: "cs128", course: "CS 128" },
+          { source: "smartphysics", course: "PHYS 211", enrollmentId: "98231" },
+          { source: "prairietest", course: "PrairieTest" },
+        ],
+      });
+      return;
+    }
+
     if (user) {
       loadData();
       loadSettings();
     }
-  }, [user]);
+  }, [user, isGuest]);
 
   const saveAssignmentsToDB = async (syncedData: Assignment[]) => {
+    if (isGuest || !user) {
+      addToast("Guest Demo Mode: Updated in local session", "info");
+      return;
+    }
     try {
       const uniqueCourses = [...new Set(syncedData.map(a => a.course))];
       
@@ -452,6 +535,35 @@ export default function Dashboard() {
 
   return (
     <>
+      {/* Guest Mode Sticky Banner */}
+      {isGuest && (
+        <div className="bg-[var(--color-ink)] text-[var(--color-paper)] px-4 sm:px-8 py-2.5 text-[13px] flex flex-col sm:flex-row items-center justify-between gap-2 border-b-[1.5px] border-[var(--color-ink)] sticky top-0 z-50">
+          <div className="flex items-center gap-2">
+            <span className="bg-[var(--color-green)] text-white text-[10px] font-[800] uppercase px-1.5 py-0.5 tracking-wider">
+              Demo Mode
+            </span>
+            <span>
+              You are exploring as a <strong>Guest</strong> with sample UIUC coursework.
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setLoginOpen(true)}
+              className="font-[700] text-[var(--color-paper)] underline hover:text-white cursor-pointer bg-transparent border-0 text-[13px] p-0"
+            >
+              Sign in with Google to sync real courses →
+            </button>
+            <span className="opacity-40">|</span>
+            <button
+              onClick={exitGuest}
+              className="text-[12px] opacity-80 hover:opacity-100 cursor-pointer bg-transparent border-0 text-[var(--color-paper)]"
+            >
+              Exit Demo
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header
         className="flex items-baseline gap-4 px-7 pb-[14px] flex-wrap bg-[rgba(255,255,255,0.95)] sticky top-0 z-10"
@@ -465,7 +577,7 @@ export default function Dashboard() {
       >
         <h1 className="m-0 text-[20px] font-[800] tracking-tight">UIUC Collective Mind</h1>
         <span className="text-[var(--color-muted)]">
-          {user?.displayName ? `Hi, ${user.displayName.split(" ")[0]}` : "Connected"}
+          {user?.displayName ? `Hi, ${user.displayName.split(" ")[0]}` : isGuest ? "Guest Explorer (Demo)" : "Connected"}
         </span>
         <span className="flex-1" />
         <div className="flex gap-2 items-center flex-wrap">
@@ -494,12 +606,30 @@ export default function Dashboard() {
           >
             Settings
           </button>
-          <button
-            onClick={logout}
-            className="text-[var(--color-ink)] bg-transparent border-[1.5px] border-[var(--color-rule)] py-[6px] px-[14px] cursor-pointer transition-all duration-200 text-[15px] font-[inherit] hover:border-[var(--color-ink)] hover:bg-[var(--color-wash)]"
-          >
-            Sign out
-          </button>
+          {isGuest ? (
+            <>
+              <button
+                onClick={() => setLoginOpen(true)}
+                className="text-[var(--color-paper)] bg-[var(--color-ink)] border-[1.5px] border-[var(--color-ink)] py-[6px] px-[14px] cursor-pointer transition-all duration-200 text-[15px] font-[600] hover:translate-x-[-1px] hover:translate-y-[-1px]"
+                style={{ boxShadow: "2px 2px 0 rgba(0,0,0,0.1)" }}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={exitGuest}
+                className="text-[var(--color-ink)] bg-transparent border-[1.5px] border-[var(--color-rule)] py-[6px] px-[14px] cursor-pointer transition-all duration-200 text-[15px] font-[inherit] hover:border-[var(--color-ink)] hover:bg-[var(--color-wash)]"
+              >
+                Exit Demo
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={logout}
+              className="text-[var(--color-ink)] bg-transparent border-[1.5px] border-[var(--color-rule)] py-[6px] px-[14px] cursor-pointer transition-all duration-200 text-[15px] font-[inherit] hover:border-[var(--color-ink)] hover:bg-[var(--color-wash)]"
+            >
+              Sign out
+            </button>
+          )}
         </div>
       </header>
 
@@ -798,6 +928,7 @@ export default function Dashboard() {
         />
       )}
       {extensionGuideOpen && <ExtensionGuideDialog onClose={() => setExtensionGuideOpen(false)} />}
+      {loginOpen && <LoginDialog onClose={() => setLoginOpen(false)} />}
     </>
   );
 }
