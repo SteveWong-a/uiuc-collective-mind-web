@@ -8,6 +8,7 @@ assignment into a Google Tasks
 list called **UIUC Homework** (visible in Google Calendar's tasks layer, the
 Tasks app, and the Gmail side panel). It also books an 8–11 PM **homework
 block** on a calendar of the same name for whatever is due within a day.
+> **Credits & Origin**: This project is based on and extends the original local application created by [**axion66**](https://github.com/axion66) at [axion66/uiuc_collective_mind](https://github.com/axion66/uiuc_collective_mind). It expands the original concept with a cloud-synchronized Web Application, Firebase PostgreSQL backend, cross-platform Electron desktop app, and a Chrome Extension.
 
 ## Setting it up for yourself (any UIUC student)
 
@@ -201,3 +202,8 @@ disappears.
 - `scripts/capture.mjs <url> <file>` — capture a logged-in page as a fixture.
 
 Runtime files (`settings.json`, `data/`, `profile/`) are gitignored.
+
+## Acknowledgements & Credits
+
+- **Original Author**: [axion66](https://github.com/axion66) — creator of the original [uiuc_collective_mind](https://github.com/axion66/uiuc_collective_mind) local CLI/server tool.
+- **Web, Desktop & Cloud Synchronizer**: [Steve Wong](https://github.com/SteveWong-a) and the open source contributors.

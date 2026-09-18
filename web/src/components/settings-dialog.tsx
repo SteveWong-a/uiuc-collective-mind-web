@@ -89,6 +89,21 @@ export default function SettingsDialog({ onClose }: SettingsDialogProps) {
             Save changes
           </button>
         </div>
+
+        <div className="mt-[24px] pt-[14px] border-t border-[var(--color-rule)] text-[12px] text-[var(--color-muted)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
+          <span>UIUC Collective Mind</span>
+          <span>
+            Original local version by{" "}
+            <a
+              href="https://github.com/axion66/uiuc_collective_mind"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--color-ink)] underline font-medium hover:text-[var(--color-accent)]"
+            >
+              axion66
+            </a>
+          </span>
+        </div>
       </form>
     </dialog>
   );

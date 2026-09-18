@@ -390,7 +390,27 @@ export default function DownloadPage() {
 
       {/* Footer */}
       <footer className="border-t border-[var(--color-rule)] py-8 text-center text-[13px] text-[var(--color-muted)]">
-        <p>UIUC Collective Mind · Built with ❤️ for the University of Illinois community · Open source</p>
+        <p className="m-0 mb-1.5">UIUC Collective Mind · Built for the University of Illinois community · Open source</p>
+        <p className="m-0">
+          Local version originally created by{" "}
+          <a
+            href="https://github.com/axion66/uiuc_collective_mind"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline text-[var(--color-ink)] font-[600] hover:text-[var(--color-accent)]"
+          >
+            axion66/uiuc_collective_mind
+          </a>
+          {" "}· Maintained and extended for web &amp; desktop by{" "}
+          <a
+            href="https://github.com/SteveWong-a/uiuc-collective-mind-web"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline text-[var(--color-ink)] font-[600]"
+          >
+            Steve Wong
+          </a>
+        </p>
       </footer>
     </div>
   );

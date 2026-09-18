@@ -17,22 +17,11 @@ import { parseGradebook as parseCs128, GRADEBOOK_URL as CS128_URL } from "@/lib/
 import { parseSmartPhysics, SMARTPHYSICS_URL } from "@/lib/sources/smartphysics";
 import SettingsDialog from "@/components/settings-dialog";
 import OnboardingDialog from "@/components/onboarding-dialog";
+import Link from "next/link";
 import ExtensionGuideDialog from "@/components/extension-guide-dialog";
+import { Assignment } from "@/lib/schemas";
 
 type Toast = { id: string; message: string; type: "success" | "error" | "info" };
-
-// Mock data type for assignments
-interface Assignment {
-  id: string;
-  course: string;
-  title: string;
-  dueAt: string | null;
-  status: "open" | "submitted" | "graded" | "closed" | "unknown" | "in_progress";
-  grade: string | null;
-  url: string | null;
-  source: string;
-  details?: string | null;
-}
 
 // Status glyphs — same as the original app
 const GLYPH: Record<string, string> = {
@@ -751,6 +740,38 @@ export default function Dashboard() {
           </section>
         </aside>
       </main>
+
+      {/* Footer with Attribution to original creator */}
+      <footer className="max-w-[1300px] mx-auto px-4 sm:px-8 py-8 mt-12 border-t-[1.5px] border-[var(--color-rule)] flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-[var(--color-muted)]">
+        <div>
+          <span>UIUC Collective Mind · Built for UIUC Students · </span>
+          <span>
+            Original local version created by{" "}
+            <a 
+              href="https://github.com/axion66/uiuc_collective_mind" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-[var(--color-ink)] underline font-medium hover:text-[var(--color-accent)]"
+            >
+              axion66
+            </a>
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
+          <Link href="/download" className="hover:text-[var(--color-ink)] transition-colors underline">
+            Desktop &amp; Extension
+          </Link>
+          <span>·</span>
+          <a 
+            href="https://github.com/SteveWong-a/uiuc-collective-mind-web" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="hover:text-[var(--color-ink)] transition-colors underline"
+          >
+            GitHub
+          </a>
+        </div>
+      </footer>
 
       {/* Toast Notification Container */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">

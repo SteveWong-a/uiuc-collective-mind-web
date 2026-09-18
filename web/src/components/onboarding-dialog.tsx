@@ -5,16 +5,11 @@ import { useAuth } from "@/lib/auth-context";
 import { upsertUser } from "@/lib/dataconnect";
 import { dataConnect } from "@/lib/firebase";
 
+import { CourseConfig, CourseConfigsArraySchema } from "@/lib/schemas";
+
 interface OnboardingDialogProps {
   onClose: () => void;
   onOpenExtensionGuide?: () => void;
-}
-
-interface CourseConfig {
-  source: "prairielearn" | "smartphysics" | "cs128" | "prairietest";
-  course: string;
-  instanceId?: string;
-  enrollmentId?: string;
 }
 
 const DEFAULT_COURSES: CourseConfig[] = [
@@ -120,14 +115,24 @@ export default function OnboardingDialog({ onClose, onOpenExtensionGuide }: Onbo
     if (activeTab === "json") {
       try {
         const parsed = JSON.parse(jsonStr);
-        if (!Array.isArray(parsed)) throw new Error("Must be a JSON array.");
-        payload = parsed;
-      } catch (err: any) {
-        setError("Invalid JSON format: " + err.message);
+        const result = CourseConfigsArraySchema.safeParse(parsed);
+        if (!result.success) {
+          setError(`Invalid JSON structure: ${result.error.issues[0]?.message || "Schema mismatch"}`);
+          return;
+        }
+        payload = result.data;
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Invalid JSON";
+        setError(`Invalid JSON format: ${msg}`);
         return;
       }
     } else {
-      payload = courses;
+      const result = CourseConfigsArraySchema.safeParse(courses);
+      if (!result.success) {
+        setError(result.error.issues[0]?.message || "Invalid course configuration.");
+        return;
+      }
+      payload = result.data;
     }
 
     const payloadJson = JSON.stringify(payload);

@@ -54,6 +54,7 @@ How it works:
 3. Click "Sync" on the dashboard to automatically import your upcoming assignments and deadlines.
 
 Source code: https://github.com/SteveWong-a/uiuc-collective-mind-web
+Credits: Based on the original open-source local application by axion66 (https://github.com/axion66/uiuc_collective_mind).
 ```
 
 ---
