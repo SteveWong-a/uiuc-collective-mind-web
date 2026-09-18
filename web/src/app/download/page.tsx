@@ -120,7 +120,16 @@ export default function DownloadPage() {
             </a>
           </div>
 
-          <p className="text-[13px] text-[var(--color-muted)] mt-3">
+          <div className="mt-4 max-w-lg mx-auto p-3 bg-[var(--color-wash)] border border-[var(--color-rule)] text-left" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
+            <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--color-muted)] font-[600] mb-1">
+              Terminal One-Line Install (Bypasses Browser Quarantine):
+            </div>
+            <div className="bg-[var(--color-paper)] border border-[var(--color-rule)] p-2 font-mono text-[11px] select-all overflow-x-auto text-[var(--color-ink)]">
+              curl -fsSL https://uiuc-collective-mind-web.vercel.app/install.sh | bash
+            </div>
+          </div>
+
+          <p className="text-[13px] text-[var(--color-muted)] mt-4">
             macOS Apple Silicon (M1/M2/M3/M4) &amp; Windows 10/11 (64-bit) ·{" "}
             <a href={RELEASES_URL} target="_blank" rel="noopener noreferrer" className="underline hover:text-[var(--color-ink)]">
               View all versions on GitHub
