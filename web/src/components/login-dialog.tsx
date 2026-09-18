@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { IconUser } from "@/components/icons";
+import { IconUser, IconX } from "@/components/icons";
 
 interface LoginDialogProps {
   onClose: () => void;
@@ -51,10 +51,10 @@ export default function LoginDialog({ onClose, onSelectGuest }: LoginDialogProps
             dialogRef.current?.close();
             onClose();
           }}
-          className="text-[18px] font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)] cursor-pointer bg-transparent border-none p-1"
+          className="text-[var(--color-muted)] hover:text-[var(--color-ink)] cursor-pointer bg-transparent border-none p-1 transition-colors"
           title="Close"
         >
-          ✕
+          <IconX className="w-4 h-4" />
         </button>
       </div>
 
@@ -68,9 +68,9 @@ export default function LoginDialog({ onClose, onSelectGuest }: LoginDialogProps
             <span>Sign-in Notice</span>
             <button
               onClick={clearError}
-              className="text-[var(--color-muted)] hover:text-[var(--color-ink)] text-[14px] cursor-pointer"
+              className="text-[var(--color-muted)] hover:text-[var(--color-ink)] cursor-pointer p-0.5"
             >
-              ✕
+              <IconX className="w-3.5 h-3.5" />
             </button>
           </div>
           <div>{error}</div>

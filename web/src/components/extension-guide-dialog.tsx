@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { IconX, IconDownload } from "@/components/icons";
 
 interface ExtensionGuideDialogProps {
   onClose: () => void;
@@ -18,15 +19,17 @@ export default function ExtensionGuideDialog({ onClose }: ExtensionGuideDialogPr
       ref={dialogRef}
       className="bg-[var(--color-paper)] text-[var(--color-ink)] w-[min(720px,94vw)] p-[30px] rounded-none z-50 backdrop:bg-black/40"
       style={{
-        border: "2px solid var(--color-ink)",
-        boxShadow: "12px 12px 0 rgba(0,0,0,0.18)",
+        border: "1px solid var(--color-ink)",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
       }}
       onClose={onClose}
     >
-      <div className="flex items-center justify-between pb-3 border-b-[1.5px] border-[var(--color-rule)] mb-5">
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 bg-[var(--color-ink)] inline-block"></span>
-          <h2 className="text-[17px] font-[800] tracking-tight uppercase m-0">
+      <div className="flex justify-between items-start pb-4 mb-4 border-b border-[var(--color-rule)]">
+        <div>
+          <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--color-muted)] mb-1">
+            Documentation
+          </div>
+          <h2 className="text-[20px] font-[800] tracking-tight m-0">
             Install Chrome Extension for Canvas Sync
           </h2>
         </div>
@@ -35,10 +38,10 @@ export default function ExtensionGuideDialog({ onClose }: ExtensionGuideDialogPr
             dialogRef.current?.close();
             onClose();
           }}
-          className="text-[18px] font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)] cursor-pointer bg-transparent border-none p-1"
+          className="text-[var(--color-muted)] hover:text-[var(--color-ink)] cursor-pointer bg-transparent border-none p-1 transition-colors"
           title="Close"
         >
-          ✕
+          <IconX className="w-4 h-4" />
         </button>
       </div>
 
@@ -48,7 +51,7 @@ export default function ExtensionGuideDialog({ onClose }: ExtensionGuideDialogPr
       </p>
 
       {/* Download Action */}
-      <div className="p-4 mb-6 bg-[var(--color-wash)] border-[1.5px] border-[var(--color-ink)] flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="p-4 mb-6 bg-[var(--color-wash)] border border-[var(--color-rule)] flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
           <div className="font-[700] text-[14px]">Step 0: Download the Extension Package</div>
           <div className="text-[12px] text-[var(--color-muted)]">Includes manifest, background worker, and sync content scripts.</div>
@@ -56,12 +59,10 @@ export default function ExtensionGuideDialog({ onClose }: ExtensionGuideDialogPr
         <a
           href="/downloads/uiuc-collective-mind-extension.zip"
           download
-          className="shrink-0 flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] text-[13px] font-[600] no-underline transition-all hover:translate-x-[-1px] hover:translate-y-[-1px]"
-          style={{ boxShadow: "2px 2px 0 rgba(0,0,0,0.15)" }}
+          className="shrink-0 flex items-center gap-2 px-4 py-2 bg-[var(--color-ink)] text-[var(--color-paper)] text-[13px] font-[600] no-underline transition-all hover:opacity-90"
+          style={{ boxShadow: "0 2px 6px rgba(0,0,0,0.12)" }}
         >
-          <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-            <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z" />
-          </svg>
+          <IconDownload className="w-4 h-4" />
           Download Extension (.zip)
         </a>
       </div>

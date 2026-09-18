@@ -640,11 +640,13 @@ export default function Dashboard() {
         {/* Getting Started Notice if not set up */}
         {assignments.length === 0 && (
           <div
-            className="border-[1.5px] border-[var(--color-ink)] bg-[var(--color-wash)] p-3.5 px-4 flex items-center justify-between gap-4 flex-wrap"
-            style={{ gridColumn: "1 / -1", boxShadow: "4px 4px 0 rgba(0,0,0,0.06)" }}
+            className="border border-[var(--color-rule)] bg-[var(--color-wash)] p-3.5 px-4 flex items-center justify-between gap-4 flex-wrap"
+            style={{ gridColumn: "1 / -1", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
           >
             <div className="flex items-center gap-2.5 text-[13px]">
-              <span className="font-[800] text-[var(--color-ink)]">⚡ Get Started:</span>
+              <span className="font-mono text-[11px] font-[600] uppercase tracking-wider px-2 py-0.5 border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink)]">
+                Getting Started
+              </span>
               <span className="text-[var(--color-muted)] leading-relaxed">
                 No assignments synced yet. Connect your courses or install the Chrome Extension to sync your Canvas, PrairieLearn &amp; SmartPhysics assignments.
               </span>
@@ -652,14 +654,14 @@ export default function Dashboard() {
             <div className="flex gap-2 items-center shrink-0">
               <button
                 onClick={() => setExtensionGuideOpen(true)}
-                className="px-3 py-1.5 bg-[var(--color-paper)] border-[1.5px] border-[var(--color-ink)] text-[12px] font-[600] text-[var(--color-ink)] cursor-pointer hover:bg-[var(--color-wash)] transition-all"
+                className="px-3 py-1.5 bg-[var(--color-paper)] border border-[var(--color-rule)] text-[12px] font-[600] text-[var(--color-ink)] cursor-pointer hover:bg-[var(--color-wash)] hover:border-[var(--color-ink)] transition-all"
               >
-                Extension Guide ⓘ
+                Extension Guide
               </button>
               <button
                 onClick={() => setOnboardingOpen(true)}
-                className="px-3 py-1.5 bg-[var(--color-ink)] border-[1.5px] border-[var(--color-ink)] text-[12px] font-[600] text-[var(--color-paper)] cursor-pointer hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all"
-                style={{ boxShadow: "2px 2px 0 rgba(0,0,0,0.1)" }}
+                className="px-3 py-1.5 bg-[var(--color-ink)] border border-[var(--color-ink)] text-[12px] font-[600] text-[var(--color-paper)] cursor-pointer hover:opacity-90 transition-all"
+                style={{ boxShadow: "0 2px 6px rgba(0,0,0,0.12)" }}
               >
                 Connect Sources →
               </button>

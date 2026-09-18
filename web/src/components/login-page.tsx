@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
+import { IconX, IconArrowRight } from "@/components/icons";
 
 export default function LoginPage() {
   const { signInWithGoogle, signInWithGoogleRedirect, error, clearError } = useAuth();
@@ -8,8 +9,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--color-paper)] px-6">
       <div
-        className="w-full max-w-md border-[2px] border-[var(--color-ink)] p-10"
-        style={{ boxShadow: "8px 8px 0 rgba(0,0,0,0.1)" }}
+        className="w-full max-w-md border border-[var(--color-ink)] p-8 sm:p-10 bg-[var(--color-paper)]"
+        style={{ boxShadow: "0 10px 30px rgba(0,0,0,0.08)" }}
       >
         {/* Logo */}
         <div className="flex items-center gap-3 mb-2">
@@ -20,21 +21,21 @@ export default function LoginPage() {
           <h1 className="text-[22px] font-[800] tracking-tight m-0">UIUC Collective Mind</h1>
         </div>
 
-        <p className="text-[var(--color-muted)] text-[15px] mb-6 mt-3 leading-relaxed">
+        <p className="text-[var(--color-muted)] text-[14px] mb-6 mt-3 leading-relaxed">
           Track your assignments, grades, and deadlines across Canvas, PrairieLearn, SmartPhysics, and more — all in one
           place.
         </p>
 
         {error && (
-          <div className="mb-6 p-4 border border-[var(--color-red)] bg-[rgba(239,68,68,0.08)] text-[13px] text-[var(--color-ink)] rounded leading-relaxed">
+          <div className="mb-6 p-4 border border-[var(--color-red)] bg-[rgba(239,68,68,0.08)] text-[13px] text-[var(--color-ink)] leading-relaxed">
             <div className="font-[700] text-[var(--color-red)] mb-1 flex items-center justify-between">
               <span>Sign-in Error</span>
               <button
                 onClick={clearError}
-                className="text-[var(--color-muted)] hover:text-[var(--color-ink)] text-[14px] cursor-pointer"
+                className="text-[var(--color-muted)] hover:text-[var(--color-ink)] cursor-pointer p-0.5"
                 title="Dismiss"
               >
-                ✕
+                <IconX className="w-3.5 h-3.5" />
               </button>
             </div>
             <div>{error}</div>
@@ -51,10 +52,8 @@ export default function LoginPage() {
 
         <button
           onClick={signInWithGoogle}
-          className="w-full flex items-center justify-center gap-3 text-[var(--color-paper)] bg-[var(--color-ink)] border-[1.5px] border-[var(--color-ink)] py-3 px-5 text-[15px] font-[500] cursor-pointer transition-all duration-200 hover:translate-x-[-1px] hover:translate-y-[-1px]"
-          style={{ boxShadow: "2px 2px 0 rgba(0,0,0,0.1)" }}
-          onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "4px 4px 0 rgba(0,0,0,0.15)")}
-          onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "2px 2px 0 rgba(0,0,0,0.1)")}
+          className="w-full flex items-center justify-center gap-3 text-[var(--color-paper)] bg-[var(--color-ink)] border border-[var(--color-ink)] py-3 px-5 text-[14px] font-[600] cursor-pointer transition-all hover:opacity-90"
+          style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}
         >
           <svg viewBox="0 0 24 24" className="w-5 h-5">
             <path
@@ -97,13 +96,13 @@ export default function LoginPage() {
 
         <div className="mt-6 pt-6 border-t border-[var(--color-rule)] flex flex-col items-center gap-2 text-center">
           <span className="text-[13px] text-[var(--color-muted)]">
-            Want automated background sync & Google Calendar blocks?
+            Want automated background sync &amp; Google Calendar blocks?
           </span>
           <a
             href="/download"
             className="inline-flex items-center gap-1.5 text-[13px] font-[600] text-[var(--color-ink)] hover:underline"
           >
-            Download Desktop App (macOS & Windows) →
+            Download Desktop App (macOS &amp; Windows) →
           </a>
         </div>
       </div>

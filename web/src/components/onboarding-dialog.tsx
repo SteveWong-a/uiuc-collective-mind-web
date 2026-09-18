@@ -6,6 +6,7 @@ import { upsertUser } from "@/lib/dataconnect";
 import { dataConnect } from "@/lib/firebase";
 
 import { CourseConfig, CourseConfigsArraySchema } from "@/lib/schemas";
+import { IconX, IconCheck } from "@/components/icons";
 
 interface OnboardingDialogProps {
   onClose: () => void;
@@ -175,13 +176,13 @@ export default function OnboardingDialog({ onClose, onOpenExtensionGuide }: Onbo
       ref={dialogRef}
       className="bg-[var(--color-paper)] text-[var(--color-ink)] w-[min(740px,94vw)] p-[28px] rounded-none z-50 backdrop:bg-black/40"
       style={{
-        border: "2px solid var(--color-ink)",
-        boxShadow: "12px 12px 0 rgba(0,0,0,0.18)",
+        border: "1px solid var(--color-ink)",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
       }}
       onClose={onClose}
     >
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b-[1.5px] border-[var(--color-rule)] mb-5">
+      <div className="flex items-center justify-between pb-3 border-b border-[var(--color-rule)] mb-5">
         <div>
           <h2 className="text-[17px] font-[800] tracking-tight uppercase m-0">
             Connect &amp; Configure Sources
@@ -195,10 +196,10 @@ export default function OnboardingDialog({ onClose, onOpenExtensionGuide }: Onbo
             dialogRef.current?.close();
             onClose();
           }}
-          className="text-[18px] font-bold text-[var(--color-muted)] hover:text-[var(--color-ink)] cursor-pointer bg-transparent border-none p-1"
+          className="text-[var(--color-muted)] hover:text-[var(--color-ink)] cursor-pointer bg-transparent border-none p-1 transition-colors"
           title="Close"
         >
-          ✕
+          <IconX className="w-4 h-4" />
         </button>
       </div>
 
@@ -299,10 +300,10 @@ export default function OnboardingDialog({ onClose, onOpenExtensionGuide }: Onbo
                     <button
                       type="button"
                       onClick={() => handleRemoveCourse(i)}
-                      className="text-[var(--color-muted)] hover:text-[var(--color-red)] font-bold text-[13px] cursor-pointer bg-transparent border-none p-1"
+                      className="text-[var(--color-muted)] hover:text-[var(--color-red)] cursor-pointer bg-transparent border-none p-1 transition-colors"
                       title="Remove course"
                     >
-                      ✕
+                      <IconX className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ))
@@ -355,7 +356,7 @@ export default function OnboardingDialog({ onClose, onOpenExtensionGuide }: Onbo
 
               <button
                 type="submit"
-                className="px-3 py-1.5 bg-[var(--color-wash)] border-[1.5px] border-[var(--color-ink)] text-[13px] font-[600] text-[var(--color-ink)] hover:bg-[var(--color-paper)] cursor-pointer"
+                className="px-3 py-1.5 bg-[var(--color-wash)] border border-[var(--color-ink)] text-[13px] font-[600] text-[var(--color-ink)] hover:bg-[var(--color-paper)] cursor-pointer transition-colors"
               >
                 + Add
               </button>
@@ -383,8 +384,9 @@ export default function OnboardingDialog({ onClose, onOpenExtensionGuide }: Onbo
       )}
 
       {saved && (
-        <div className="p-2.5 mb-4 text-[13px] text-[var(--color-green)] bg-green-50 border border-[var(--color-green)] font-semibold">
-          ✓ Configuration saved securely. Reloading...
+        <div className="p-2.5 mb-4 text-[13px] text-[var(--color-green)] bg-green-50 border border-[var(--color-green)] font-semibold flex items-center gap-2">
+          <IconCheck className="w-4 h-4" />
+          <span>Configuration saved securely. Reloading...</span>
         </div>
       )}
 
