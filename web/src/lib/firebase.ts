@@ -16,8 +16,8 @@ export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getA
 export const auth = getAuth(app);
 
 export const dataConnect = getDataConnect(app, connectorConfig);
-// Connect to the local Data Connect emulator (PostgreSQL) only in development
-if (process.env.NODE_ENV === 'development') {
+// Connect to the local Data Connect emulator (PostgreSQL) only if explicitly enabled
+if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_EMULATOR === 'true') {
   connectDataConnectEmulator(dataConnect, 'localhost', 9399);
 }
 

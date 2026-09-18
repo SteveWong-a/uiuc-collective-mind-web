@@ -221,10 +221,25 @@ export default function Dashboard() {
     };
     
     const loadSettings = async () => {
+      if (typeof window !== "undefined") {
+        try {
+          const cached = localStorage.getItem("uiuc_cmind_courses");
+          if (cached) {
+            setAppSettings({ courses: JSON.parse(cached) });
+          }
+        } catch (e) {
+          console.error("Failed to read cached courses", e);
+        }
+      }
+
       try {
         const res = await getUser(dataConnect);
         if (res.data?.user?.courseConfigs) {
-          setAppSettings({ courses: JSON.parse(res.data.user.courseConfigs) });
+          const parsed = JSON.parse(res.data.user.courseConfigs);
+          setAppSettings({ courses: parsed });
+          if (typeof window !== "undefined") {
+            localStorage.setItem("uiuc_cmind_courses", res.data.user.courseConfigs);
+          }
         }
       } catch (err) {
         console.error("Failed to load custom courses from DB:", err);

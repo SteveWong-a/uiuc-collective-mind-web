@@ -39,6 +39,23 @@ export default function OnboardingDialog({ onClose, onOpenExtensionGuide }: Onbo
   useEffect(() => {
     dialogRef.current?.showModal();
     const loadExistingConfig = async () => {
+      let initialFound = false;
+      if (typeof window !== "undefined") {
+        try {
+          const cached = localStorage.getItem("uiuc_cmind_courses");
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setCourses(parsed);
+              setJsonStr(JSON.stringify(parsed, null, 2));
+              initialFound = true;
+            }
+          }
+        } catch (e) {
+          console.error("Failed to parse cached course configs", e);
+        }
+      }
+
       if (user) {
         try {
           const { getUser } = await import("@/lib/dataconnect");
@@ -48,14 +65,19 @@ export default function OnboardingDialog({ onClose, onOpenExtensionGuide }: Onbo
             if (Array.isArray(parsed)) {
               setCourses(parsed);
               setJsonStr(JSON.stringify(parsed, null, 2));
+              if (typeof window !== "undefined") {
+                localStorage.setItem("uiuc_cmind_courses", res.data.user.courseConfigs);
+              }
+              initialFound = true;
             }
-          } else {
-            setJsonStr(JSON.stringify(DEFAULT_COURSES, null, 2));
           }
         } catch (e) {
-          console.error("Failed to load existing course configs", e);
-          setJsonStr(JSON.stringify(DEFAULT_COURSES, null, 2));
+          console.error("Failed to load existing course configs from Data Connect", e);
         }
+      }
+
+      if (!initialFound) {
+        setJsonStr(JSON.stringify(DEFAULT_COURSES, null, 2));
       }
     };
     loadExistingConfig();
@@ -108,10 +130,21 @@ export default function OnboardingDialog({ onClose, onOpenExtensionGuide }: Onbo
       payload = courses;
     }
 
+    const payloadJson = JSON.stringify(payload);
+
+    // Save locally immediately so changes are never lost
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("uiuc_cmind_courses", payloadJson);
+      } catch (e) {
+        console.error("Failed to save to localStorage", e);
+      }
+    }
+
     try {
       await upsertUser(dataConnect, {
         email: user.email || "",
-        courseConfigs: JSON.stringify(payload),
+        courseConfigs: payloadJson,
       });
 
       setSaved(true);
@@ -119,10 +152,16 @@ export default function OnboardingDialog({ onClose, onOpenExtensionGuide }: Onbo
         dialogRef.current?.close();
         onClose();
         window.location.reload();
-      }, 1200);
-    } catch (err) {
-      setError("Failed to save course configuration.");
-      console.error(err);
+      }, 1000);
+    } catch (err: any) {
+      console.warn("Failed to sync course configuration to Data Connect:", err);
+      // Saved locally, so still allow the app to reload with updated courses
+      setSaved(true);
+      setTimeout(() => {
+        dialogRef.current?.close();
+        onClose();
+        window.location.reload();
+      }, 1000);
     }
   };
 
