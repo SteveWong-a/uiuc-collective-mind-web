@@ -10,6 +10,8 @@
     "https://cs128.org/*",
     "https://smart.physics.illinois.edu/*",
     "http://localhost:3000/*",
+    "https://uiuc-collective-mind-web.vercel.app/*",
+    "https://*.vercel.app/*",
     "https://uiuc-cmind-2026.web.app/*",
     "https://uiuc-cmind-2026.firebaseapp.com/*"
   ],
@@ -20,6 +22,8 @@
     {
       "matches": [
         "http://localhost:3000/*",
+        "https://uiuc-collective-mind-web.vercel.app/*",
+        "https://*.vercel.app/*",
         "https://uiuc-cmind-2026.web.app/*",
         "https://uiuc-cmind-2026.firebaseapp.com/*"
       ],

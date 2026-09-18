@@ -1,5 +1,9 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "FETCH_CANVAS_DATA") {
+  if (message.type === "FETCH_CANVAS_DATA" || message.type === "FETCH_SOURCE_DATA") {
+    if (message.type === "FETCH_SOURCE_DATA" && message.source && message.source !== "canvas") {
+      sendResponse({ success: false, error: `Unsupported source for extension fetch: ${message.source}` });
+      return false;
+    }
     (async () => {
       try {
         const data = await scrapeCanvas();

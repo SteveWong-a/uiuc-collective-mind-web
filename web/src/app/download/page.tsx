@@ -127,6 +127,77 @@ export default function DownloadPage() {
           </p>
         </div>
 
+        {/* Chrome Extension Card for Web App Users */}
+        <div
+          className="border-[2px] border-[var(--color-ink)] p-6 sm:p-8 bg-[var(--color-paper)] mb-12"
+          style={{ boxShadow: "6px 6px 0 rgba(0,0,0,0.1)" }}
+        >
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-[var(--color-rule)]">
+            <div>
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 bg-[var(--color-wash)] border border-[var(--color-rule)] text-[11px] font-[600] uppercase tracking-wider mb-2">
+                Chrome Extension
+              </div>
+              <h2 className="text-2xl font-[800] tracking-tight m-0">
+                Using the Web App? Install the Canvas Sync Extension
+              </h2>
+              <p className="text-[14px] text-[var(--color-muted)] mt-1.5 max-w-xl leading-relaxed">
+                Browsers restrict web applications from reading cross-origin session cookies. Our lightweight Chrome Extension securely bridges your browser session with Canvas, PrairieLearn, and SmartPhysics so you can sync assignments in 1 click.
+              </p>
+            </div>
+            <a
+              href="/downloads/uiuc-collective-mind-extension.zip"
+              download
+              className="flex items-center gap-2.5 px-5 py-3 bg-[var(--color-ink)] text-[var(--color-paper)] text-[14px] font-[600] no-underline transition-all hover:translate-x-[-1px] hover:translate-y-[-1px] shrink-0"
+              style={{ boxShadow: "3px 3px 0 rgba(0,0,0,0.15)" }}
+            >
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z" />
+              </svg>
+              <span>Download Extension (.zip)</span>
+            </a>
+          </div>
+
+          <div className="mt-6">
+            <h3 className="text-[15px] font-[700] mb-4">Step-by-Step Installation Guide (takes &lt; 1 minute):</h3>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-[13px]">
+              <div className="p-3.5 bg-[var(--color-wash)] border border-[var(--color-rule)]">
+                <div className="font-[800] text-[15px] mb-1.5 text-[var(--color-ink)]">1. Download &amp; Unzip</div>
+                <p className="text-[var(--color-muted)] m-0 leading-relaxed">
+                  Click the button above to download <code>uiuc-collective-mind-extension.zip</code> and extract it into a folder.
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-[var(--color-wash)] border border-[var(--color-rule)]">
+                <div className="font-[800] text-[15px] mb-1.5 text-[var(--color-ink)]">2. Open Extensions</div>
+                <p className="text-[var(--color-muted)] m-0 leading-relaxed">
+                  In Chrome, go to <code className="font-mono bg-[var(--color-paper)] px-1">chrome://extensions</code> in your address bar.
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-[var(--color-wash)] border border-[var(--color-rule)]">
+                <div className="font-[800] text-[15px] mb-1.5 text-[var(--color-ink)]">3. Developer Mode</div>
+                <p className="text-[var(--color-muted)] m-0 leading-relaxed">
+                  Turn on the <strong>Developer mode</strong> toggle in the top-right corner of the Extensions page.
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-[var(--color-wash)] border border-[var(--color-rule)]">
+                <div className="font-[800] text-[15px] mb-1.5 text-[var(--color-ink)]">4. Load Unpacked</div>
+                <p className="text-[var(--color-muted)] m-0 leading-relaxed">
+                  Click <strong>Load unpacked</strong> (top-left) and select the unzipped <code>extension</code> folder.
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-[var(--color-wash)] border border-[var(--color-rule)]">
+                <div className="font-[800] text-[15px] mb-1.5 text-[var(--color-ink)]">5. Log in &amp; Sync</div>
+                <p className="text-[var(--color-muted)] m-0 leading-relaxed">
+                  Ensure you are logged into Canvas in Chrome, then return to the Dashboard and click <strong>Sync</strong>!
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Security / Open Source Notice (Low Budget / Beta Explanation) */}
         <div
           className="border-[2px] border-[var(--color-ink)] p-6 sm:p-8 bg-[var(--color-wash)] mb-12"

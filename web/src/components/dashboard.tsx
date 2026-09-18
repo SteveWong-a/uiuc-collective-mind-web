@@ -17,6 +17,7 @@ import { parseGradebook as parseCs128, GRADEBOOK_URL as CS128_URL } from "@/lib/
 import { parseSmartPhysics, SMARTPHYSICS_URL } from "@/lib/sources/smartphysics";
 import SettingsDialog from "@/components/settings-dialog";
 import OnboardingDialog from "@/components/onboarding-dialog";
+import ExtensionGuideDialog from "@/components/extension-guide-dialog";
 
 type Toast = { id: string; message: string; type: "success" | "error" | "info" };
 
@@ -178,6 +179,7 @@ export default function Dashboard() {
   const { user, logout } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [extensionGuideOpen, setExtensionGuideOpen] = useState(false);
   const [filter, setFilter] = useState<string | null>(null);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -586,9 +588,18 @@ export default function Dashboard() {
         {/* Right sidebar */}
         <aside>
           <section className="mb-[30px]">
-            <h2 className="text-[15px] font-semibold text-[var(--color-muted)] mt-0 mb-[8px] uppercase tracking-[0.5px]">
-              Sources
-            </h2>
+            <div className="flex items-center justify-between mt-0 mb-[8px]">
+              <h2 className="text-[15px] font-semibold text-[var(--color-muted)] m-0 uppercase tracking-[0.5px]">
+                Sources
+              </h2>
+              <button
+                onClick={() => setExtensionGuideOpen(true)}
+                className="text-[12px] font-semibold text-[var(--color-ink)] hover:underline flex items-center gap-1 cursor-pointer bg-transparent border-none p-0"
+              >
+                <span>Extension Guide</span>
+                <span>ⓘ</span>
+              </button>
+            </div>
             <div className="py-[8px]" style={{ borderTop: "1.5px solid var(--color-ink)" }}>
               {/* Canvas Source */}
               <div className="flex justify-between items-center py-[8px] border-b-[1px] border-[var(--color-rule)]">
@@ -677,6 +688,7 @@ export default function Dashboard() {
 
       {settingsOpen && <SettingsDialog onClose={() => setSettingsOpen(false)} />}
       {onboardingOpen && <OnboardingDialog onClose={() => setOnboardingOpen(false)} />}
+      {extensionGuideOpen && <ExtensionGuideDialog onClose={() => setExtensionGuideOpen(false)} />}
     </>
   );
 }

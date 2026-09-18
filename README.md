@@ -41,6 +41,16 @@ calendar feed URL (step 1 below) and, if you use it, the Google client id +
 secret (step 3). `settings.json`, `profile/`, `data/` are per-machine and
 gitignored, so each Mac keeps its own logins and settings.
 
+### Web Application & Chrome Extension (Canvas Sync)
+
+If you are using the Web App hosted on Vercel at [uiuc-collective-mind-web.vercel.app](https://uiuc-collective-mind-web.vercel.app) (or locally at `localhost:3000`):
+
+1. **Download the Extension:** Download `uiuc-collective-mind-extension.zip` from the Web App download page or use the `extension/` folder in this repo.
+2. **Open Extensions in Chrome:** Navigate to `chrome://extensions` in your Chrome address bar.
+3. **Turn on Developer Mode:** Toggle the **Developer mode** switch (top-right corner) to **ON**.
+4. **Load Unpacked:** Click the **Load unpacked** button (top-left) and select the `extension/` folder.
+5. **Sync Assignments:** Log into [canvas.illinois.edu](https://canvas.illinois.edu) in Chrome, open the UIUC Collective Mind dashboard, and click **Sync** next to Canvas!
+
 Optional, macOS: drop the port number so the app is at http://course.localhost —
 one-time, reboot-safe, no sudo: `bash scripts/port80.sh` (undo with
 `bash scripts/uninstall-port80.sh`). It runs a small forwarder as a second
