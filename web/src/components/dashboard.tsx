@@ -332,6 +332,11 @@ export default function Dashboard() {
     groups.get(k)!.push(a);
   }
 
+  const canvasAssignments = assignments.filter((a) => a.source === "canvas");
+  const plAssignments = assignments.filter((a) => a.source === "prairielearn");
+  const plCourses = (appSettings?.courses || []).filter((c: any) => c.source === "prairielearn");
+  const otherCourses = (appSettings?.courses || []).filter((c: any) => c.source !== "prairielearn" && c.source !== "canvas");
+
   const handleCanvasSync = useCallback(() => {
     setIsSyncing(true);
     window.postMessage({ type: "CMIND_SYNC_REQUEST", source: "canvas", settings: appSettings }, "*");
@@ -495,11 +500,47 @@ export default function Dashboard() {
       </header>
 
       {/* Main content */}
-      <main className="max-w-[1160px] mx-auto py-[18px] px-7 pb-[60px] grid gap-10" style={{ gridTemplateColumns: "minmax(0, 1fr) 300px" }}>
+      <main
+        className="max-w-[1160px] mx-auto px-7 pb-[60px] grid gap-10"
+        style={{
+          gridTemplateColumns: "minmax(0, 1fr) 300px",
+          paddingTop: "38px",
+        }}
+      >
+        {/* Getting Started Notice if not set up */}
+        {assignments.length === 0 && (
+          <div
+            className="border-[1.5px] border-[var(--color-ink)] bg-[var(--color-wash)] p-3.5 px-4 flex items-center justify-between gap-4 flex-wrap"
+            style={{ gridColumn: "1 / -1", boxShadow: "4px 4px 0 rgba(0,0,0,0.06)" }}
+          >
+            <div className="flex items-center gap-2.5 text-[13px]">
+              <span className="font-[800] text-[var(--color-ink)]">⚡ Get Started:</span>
+              <span className="text-[var(--color-muted)] leading-relaxed">
+                No assignments synced yet. Connect your courses or install the Chrome Extension to sync your Canvas, PrairieLearn &amp; SmartPhysics assignments.
+              </span>
+            </div>
+            <div className="flex gap-2 items-center shrink-0">
+              <button
+                onClick={() => setExtensionGuideOpen(true)}
+                className="px-3 py-1.5 bg-[var(--color-paper)] border-[1.5px] border-[var(--color-ink)] text-[12px] font-[600] text-[var(--color-ink)] cursor-pointer hover:bg-[var(--color-wash)] transition-all"
+              >
+                Extension Guide ⓘ
+              </button>
+              <button
+                onClick={() => setOnboardingOpen(true)}
+                className="px-3 py-1.5 bg-[var(--color-ink)] border-[1.5px] border-[var(--color-ink)] text-[12px] font-[600] text-[var(--color-paper)] cursor-pointer hover:translate-x-[-1px] hover:translate-y-[-1px] transition-all"
+                style={{ boxShadow: "2px 2px 0 rgba(0,0,0,0.1)" }}
+              >
+                Connect Sources →
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Left column */}
         <section>
           {/* Course filter chips & Overdue toggle */}
-          <div className="flex justify-between items-center flex-wrap gap-3 my-[4px] mb-[22px]">
+          <div className="flex justify-between items-center flex-wrap gap-3 mt-1 mb-[26px]">
             <div className="flex gap-[6px] flex-wrap m-0">
               <span
                 onClick={() => setFilter(null)}
@@ -588,7 +629,7 @@ export default function Dashboard() {
         {/* Right sidebar */}
         <aside>
           <section className="mb-[30px]">
-            <div className="flex items-center justify-between mt-0 mb-[8px]">
+            <div className="flex items-center justify-between mt-0 mb-[10px]">
               <h2 className="text-[15px] font-semibold text-[var(--color-muted)] m-0 uppercase tracking-[0.5px]">
                 Sources
               </h2>
@@ -600,46 +641,73 @@ export default function Dashboard() {
                 <span>ⓘ</span>
               </button>
             </div>
-            <div className="py-[8px]" style={{ borderTop: "1.5px solid var(--color-ink)" }}>
+
+            <div>
               {/* Canvas Source */}
-              <div className="flex justify-between items-center py-[8px] border-b-[1px] border-[var(--color-rule)]">
-                <span className="font-semibold text-[14px]">Canvas</span>
+              <div className="flex justify-between items-center py-[10px] border-t-[1.5px] border-[var(--color-ink)]">
+                <div>
+                  <span className="font-semibold text-[14px] block">Canvas</span>
+                  <span className="text-[11px] text-[var(--color-muted)]">
+                    {canvasAssignments.length > 0 ? `${canvasAssignments.length} items synced` : "Requires Extension"}
+                  </span>
+                </div>
                 <button
                   onClick={handleCanvasSync}
                   disabled={isSyncing}
-                  className="text-[var(--color-ink)] bg-transparent border-[1.5px] border-[var(--color-rule)] py-[4px] px-[10px] text-[13px] font-medium cursor-pointer hover:border-[var(--color-ink)] hover:bg-[var(--color-wash)] transition-all duration-200 disabled:opacity-50 disabled:cursor-wait"
+                  className="text-[var(--color-ink)] bg-transparent border-[1.5px] border-[var(--color-rule)] py-[3px] px-[10px] text-[12px] font-medium cursor-pointer hover:border-[var(--color-ink)] hover:bg-[var(--color-wash)] transition-all disabled:opacity-50 disabled:cursor-wait"
                 >
                   {isSyncing ? "Syncing..." : "Sync"}
                 </button>
               </div>
 
               {/* PrairieLearn Source */}
-              <div className="flex justify-between items-center py-[8px] border-b-[1px] border-[var(--color-rule)]">
-                <span className="font-semibold text-[14px]">PrairieLearn</span>
+              <div className="flex justify-between items-center py-[10px] border-t border-[var(--color-rule)]">
+                <div>
+                  <span className="font-semibold text-[14px] block">PrairieLearn</span>
+                  <span className="text-[11px] text-[var(--color-muted)]">
+                    {plAssignments.length > 0
+                      ? `${plAssignments.length} items synced`
+                      : plCourses.length > 0
+                      ? `${plCourses.length} course(s) configured`
+                      : "Needs course setup"}
+                  </span>
+                </div>
                 <button
                   onClick={handlePLSync}
                   disabled={isPLSyncing}
-                  className="text-[var(--color-ink)] bg-transparent border-[1.5px] border-[var(--color-rule)] py-[4px] px-[10px] text-[13px] font-medium cursor-pointer hover:border-[var(--color-ink)] hover:bg-[var(--color-wash)] transition-all duration-200 disabled:opacity-50 disabled:cursor-wait"
+                  className="text-[var(--color-ink)] bg-transparent border-[1.5px] border-[var(--color-rule)] py-[3px] px-[10px] text-[12px] font-medium cursor-pointer hover:border-[var(--color-ink)] hover:bg-[var(--color-wash)] transition-all disabled:opacity-50 disabled:cursor-wait"
                 >
                   {isPLSyncing ? "Syncing..." : "Sync"}
                 </button>
               </div>
 
               {/* Custom Sources */}
-              <div className="flex justify-between items-center py-[8px] border-b-[1px] border-[var(--color-rule)]">
-                <span className="font-semibold text-[14px]">Custom Sources</span>
+              <div className="flex justify-between items-center py-[10px] border-t border-[var(--color-rule)]">
+                <div>
+                  <span className="font-semibold text-[14px] block">CS 128 / SmartPhysics</span>
+                  <span className="text-[11px] text-[var(--color-muted)]">
+                    {otherCourses.length > 0 ? `${otherCourses.length} course(s)` : "Optional"}
+                  </span>
+                </div>
                 <button
                   onClick={handleCustomSync}
                   disabled={isCustomSyncing || !appSettings}
-                  className="text-[var(--color-ink)] bg-transparent border-[1.5px] border-[var(--color-rule)] py-[4px] px-[10px] text-[13px] font-medium cursor-pointer hover:border-[var(--color-ink)] hover:bg-[var(--color-wash)] transition-all duration-200 disabled:opacity-50 disabled:cursor-wait"
+                  className="text-[var(--color-ink)] bg-transparent border-[1.5px] border-[var(--color-rule)] py-[3px] px-[10px] text-[12px] font-medium cursor-pointer hover:border-[var(--color-ink)] hover:bg-[var(--color-wash)] transition-all disabled:opacity-50 disabled:cursor-wait"
                 >
                   {isCustomSyncing ? "Syncing..." : "Sync"}
                 </button>
               </div>
             </div>
-            <p className="text-[var(--color-muted)] text-[12px] mt-3 leading-relaxed">
-              Connect your Canvas and PrairieLearn accounts by clicking "Connect Sources" above.
-            </p>
+
+            <div className="mt-3 pt-3 border-t border-[var(--color-rule)]">
+              <button
+                onClick={() => setOnboardingOpen(true)}
+                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 text-[13px] font-[600] text-[var(--color-ink)] bg-[var(--color-wash)] border-[1.5px] border-[var(--color-ink)] hover:bg-[var(--color-paper)] transition-all cursor-pointer"
+                style={{ boxShadow: "2px 2px 0 rgba(0,0,0,0.06)" }}
+              >
+                <span>+ Connect / Configure Sources</span>
+              </button>
+            </div>
           </section>
 
           <section className="mb-[30px]">
@@ -687,7 +755,12 @@ export default function Dashboard() {
       </div>
 
       {settingsOpen && <SettingsDialog onClose={() => setSettingsOpen(false)} />}
-      {onboardingOpen && <OnboardingDialog onClose={() => setOnboardingOpen(false)} />}
+      {onboardingOpen && (
+        <OnboardingDialog
+          onClose={() => setOnboardingOpen(false)}
+          onOpenExtensionGuide={() => setExtensionGuideOpen(true)}
+        />
+      )}
       {extensionGuideOpen && <ExtensionGuideDialog onClose={() => setExtensionGuideOpen(false)} />}
     </>
   );
