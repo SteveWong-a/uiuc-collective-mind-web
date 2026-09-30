@@ -33,3 +33,4 @@ launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
 launchctl bootstrap "gui/$(id -u)" "$PLIST"
 launchctl kickstart -k "gui/$(id -u)/$LABEL"
 echo "Installed $LABEL. Logs: $ROOT/logs/server.log"
+echo "Open the UI with: bash $ROOT/scripts/open-ui.sh"

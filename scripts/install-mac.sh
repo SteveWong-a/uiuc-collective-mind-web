@@ -16,8 +16,8 @@ cp -R "$MOUNT_DIR/UIUC Collective Mind.app" "/Applications/"
 hdiutil detach "$MOUNT_DIR" -quiet || true
 rm -rf "$MOUNT_DIR" "$TMP_DMG"
 
-# Strip any quarantine attributes so Gatekeeper never prompts
-xattr -cr "/Applications/UIUC Collective Mind.app" 2>/dev/null || true
+# Leave Gatekeeper quarantine in place. Prefer a notarized build and the usual
+# right-click → Open (or System Settings → Privacy & Security → Open Anyway).
 
 echo "==> Successfully installed UIUC Collective Mind!"
 open "/Applications/UIUC Collective Mind.app"

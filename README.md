@@ -35,7 +35,7 @@ Install [Node.js](https://nodejs.org) 20+ (LTS installer is fine), then in Termi
     npm install
     npx playwright install chromium
     bash scripts/install-launchagent.sh     # starts now, at every login, and after crashes (no sudo)
-    open http://course.localhost:4258
+    bash scripts/open-ui.sh                 # opens the local UI with this install's API token
 
 Then, once, in the app's **Settings** (gear, top right): paste your Canvas
 calendar feed URL (step 1 below) and, if you use it, the Google client id +
@@ -79,7 +79,8 @@ To run it by hand instead of the agent: `npm start` (opens the page). Any
    **Pull now**. The window closes itself as soon as a pull succeeds through
    it. The browser session is kept in `profile/`, with a copy of the live
    session cookies in `data/cookies.json` so a reset profile does not always
-   mean logging in again (both are gitignored — never commit them).
+   mean logging in again (LMS hosts only — Illinois SSO / Microsoft login
+   cookies are not written there; both files are gitignored — never commit them).
 3. **Google** (optional). A shared OAuth client is built in (`DEFAULTS.google`
    in `lib/settings.mjs`), so there is nothing to paste: message the repo
    owner the Gmail address you will connect, wait for them to add it as a
@@ -125,7 +126,7 @@ CS 124 is dropped (PrairieTest lists it in error).
 What it installs: `~/Library/LaunchAgents/com.uiuc-collective-mind.plist`,
 which runs `scripts/run-forever.sh` in your login session (so login windows can
 still open). That loop restarts `node server.mjs` five seconds after any exit.
-It does not open a browser tab on boot; bookmark http://course.localhost:4258.
+It does not open a browser tab on boot; run `bash scripts/open-ui.sh` (or bookmark http://course.localhost:4258 after that has set the session cookie once).
 After `git pull`, restart it with
 `launchctl kickstart -k gui/$(id -u)/com.uiuc-collective-mind`.
 

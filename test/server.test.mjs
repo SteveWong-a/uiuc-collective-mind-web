@@ -30,14 +30,27 @@ const calls = [];
 const poller = { run: async () => { calls.push("run"); return { changes: [] }; }, running: false, nextAt: "2026-09-03T13:00:00.000Z" };
 const browser = { openForLogin: async (u) => calls.push("login:" + u) };
 const auth = { connected: false, authUrl: ({ redirectUri }) => ({ url: "https://accounts.google.com/x?r=" + encodeURIComponent(redirectUri), state: "s" }), handleCallback: async ({ code, state }) => { if (state !== "s") throw new Error("OAuth state mismatch"); calls.push(`cb:${code}:${state}`); auth.connected = true; }, disconnect: () => { auth.connected = false; } };
-const server = createServer({ store, settingsFile: join(dir, "settings.json"), poller, browser, google: { auth }, bus, log: () => {}, recentLog: () => [], publicDir: join(dir, "public") });
+const TOKEN = "test-local-api-token-value-32chars-min";
+const authHeaders = { authorization: `Bearer ${TOKEN}` };
+const server = createServer({ store, settingsFile: join(dir, "settings.json"), poller, browser, google: { auth }, bus, log: () => {}, recentLog: () => [], publicDir: join(dir, "public"), apiToken: TOKEN });
 await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const base = `http://127.0.0.1:${server.address().port}`;
 after(() => server.close());
-const j = async (path, opts = {}) => { const res = await fetch(base + path, { headers: { "content-type": "application/json" }, redirect: "manual", ...opts, body: opts.body ? JSON.stringify(opts.body) : undefined }); return { status: res.status, body: res.status === 204 || res.status >= 300 ? null : await res.json(), headers: res.headers }; };
+const j = async (path, opts = {}) => {
+  const { headers, body, ...rest } = opts;
+  const res = await fetch(base + path, {
+    redirect: "manual",
+    ...rest,
+    headers: { "content-type": "application/json", ...authHeaders, ...headers },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  return { status: res.status, body: res.status === 204 || res.status >= 300 ? null : await res.json(), headers: res.headers };
+};
 
-test("index and state", async () => {
+test("index is public; state requires the per-install token", async () => {
   assert.match(await (await fetch(base + "/")).text(), /ui/);
+  const noAuth = await fetch(base + "/api/state");
+  assert.equal(noAuth.status, 401);
   const { body } = await j("/api/state");
   assert.equal(body.assignments.length, 1);
   assert.equal(body.nextPoll, "2026-09-03T13:00:00.000Z");
@@ -45,16 +58,50 @@ test("index and state", async () => {
   assert.equal(body.settings.canvasToken, "");
 });
 
-test("rejects foreign origin", async () => {
-  const res = await fetch(base + "/api/state", { headers: { origin: "https://evil.example" } });
+test("HTML does not leak the API token cookie to unauthenticated GET /", async () => {
+  const res = await fetch(base + "/");
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get("set-cookie"), null);
+});
+
+test("GET /?t= sets the HttpOnly cookie and redirects without the token in Location", async () => {
+  const res = await fetch(base + "/?t=" + TOKEN, { redirect: "manual" });
+  assert.equal(res.status, 302);
+  assert.equal(res.headers.get("location"), "/");
+  const cookie = res.headers.get("set-cookie") ?? "";
+  assert.match(cookie, new RegExp(`ucm_api=${TOKEN}(?:;|$)`));
+  assert.match(cookie, /HttpOnly/i);
+  assert.match(cookie, /SameSite=Lax/i);
+  const wrong = await fetch(base + "/?t=nope", { redirect: "manual" });
+  assert.equal(wrong.status, 200);
+  assert.equal(wrong.headers.get("set-cookie"), null);
+});
+
+test("API cookie is accepted in place of Authorization", async () => {
+  const res = await fetch(base + "/api/state", { headers: { cookie: `ucm_api=${TOKEN}` } });
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).assignments.length, 1);
+  const bad = await fetch(base + "/api/state", { headers: { cookie: "ucm_api=wrong-token-value-32chars-minimum" } });
+  assert.equal(bad.status, 401);
+});
+
+test("rejects foreign origin even with a valid token", async () => {
+  const res = await fetch(base + "/api/state", { headers: { ...authHeaders, origin: "https://evil.example" } });
   assert.equal(res.status, 403);
+});
+
+test("rejects browser-like API requests that omit Origin", async () => {
+  const res = await fetch(base + "/api/state", { headers: { ...authHeaders, "sec-fetch-site": "cross-site" } });
+  assert.equal(res.status, 403);
+  const img = await fetch(base + "/api/state", { headers: { cookie: `ucm_api=${TOKEN}`, "sec-fetch-site": "cross-site" } });
+  assert.equal(img.status, 403);
 });
 
 test("accepts *.localhost host names and rejects other hosts", async () => {
   const port = server.address().port;
   // fetch() refuses to override Host, so use a raw request.
   const raw = (headers) => new Promise((resolve, reject) => {
-    const req = request({ host: "127.0.0.1", port, path: "/api/state", method: "GET", headers }, (res) => { res.resume(); res.on("end", () => resolve(res.statusCode)); });
+    const req = request({ host: "127.0.0.1", port, path: "/api/state", method: "GET", headers: { ...authHeaders, ...headers } }, (res) => { res.resume(); res.on("end", () => resolve(res.statusCode)); });
     req.on("error", reject); req.end();
   });
   assert.equal(await raw({ host: `course.localhost:${port}`, origin: `http://course.localhost:${port}` }), 200);
@@ -62,6 +109,12 @@ test("accepts *.localhost host names and rejects other hosts", async () => {
   assert.equal(await raw({ host: `course.localhost:${port + 1}` }), 403);
   assert.equal(await raw({ host: "course.localhost", origin: "http://course.localhost" }), 200, "port-less host via the port-80 redirect");
   assert.equal(await raw({ host: `course.localhost:${port}`, origin: `http://evil.localhost.example:${port}` }), 403);
+});
+
+test("mutations and SSE require the token", async () => {
+  assert.equal((await fetch(base + "/api/poll", { method: "POST" })).status, 401);
+  assert.equal((await fetch(base + "/api/events")).status, 401);
+  assert.equal((await fetch(base + "/api/google/disconnect", { method: "POST" })).status, 401);
 });
 
 test("poll, settings, login", async () => {
@@ -100,7 +153,7 @@ test("oauth callback with wrong state returns 400", async () => {
 test("SSE events stream state and log, and clean up listeners on close", { timeout: 5000 }, async () => {
   const before = { state: bus.listenerCount("state"), log: bus.listenerCount("log") };
   const controller = new AbortController();
-  const res = await fetch(base + "/api/events", { signal: controller.signal });
+  const res = await fetch(base + "/api/events", { headers: authHeaders, signal: controller.signal });
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
   let buf = "";
