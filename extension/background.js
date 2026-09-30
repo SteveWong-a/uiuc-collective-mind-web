@@ -1,4 +1,11 @@
+importScripts("allowlist.js");
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (!isCmindAppSender(sender)) {
+    sendResponse({ success: false, error: "forbidden origin" });
+    return false;
+  }
+
   if (message.type === "FETCH_CANVAS_DATA" || message.type === "FETCH_SOURCE_DATA") {
     if (message.type === "FETCH_SOURCE_DATA" && message.source && message.source !== "canvas") {
       sendResponse({ success: false, error: `Unsupported source for extension fetch: ${message.source}` });
@@ -14,8 +21,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     })();
     return true;
   }
-  
+
   if (message.type === "FETCH_HTML") {
+    if (!isAllowedHtmlFetchUrl(message.url)) {
+      sendResponse({ success: false, error: "URL is not an allowed listing page" });
+      return false;
+    }
     (async () => {
       try {
         const res = await fetch(message.url);
@@ -36,37 +47,37 @@ async function scrapeCanvas() {
   const coursesRes = await fetch(
     "https://canvas.illinois.edu/api/v1/users/self/courses?enrollment_state=active&include[]=term&per_page=100"
   );
-  
+
   if (!coursesRes.ok) {
     throw new Error("Canvas authentication failed. Please log in to Canvas in another tab first.");
   }
-  
+
   let coursesText = await coursesRes.text();
   // Canvas returns while(1); to prevent JSON hijacking. We must strip it.
   if (coursesText.startsWith("while(1);")) {
     coursesText = coursesText.substring(9);
   }
-  
+
   const courses = JSON.parse(coursesText);
   const assignments = [];
-  
+
   // 2. Fetch assignments for each active course
   for (const course of courses) {
     // Skip if it's restricted or has no ID
     if (!course.id || course.access_restricted_by_date) continue;
-    
+
     // Fetch assignments and include the user's submission data (status/grade)
     const assignRes = await fetch(
       `https://canvas.illinois.edu/api/v1/courses/${course.id}/assignments?include[]=submission&per_page=100`
     );
-    
+
     if (!assignRes.ok) continue;
-    
+
     let assignText = await assignRes.text();
     if (assignText.startsWith("while(1);")) assignText = assignText.substring(9);
-    
+
     const courseAssignments = JSON.parse(assignText);
-    
+
     for (const a of courseAssignments) {
       assignments.push({
         id: `canvas-${a.id}`,
@@ -80,7 +91,7 @@ async function scrapeCanvas() {
       });
     }
   }
-  
+
   return assignments;
 }
 
@@ -96,7 +107,7 @@ function getStatus(assignment) {
 function getGrade(assignment) {
   const sub = assignment.submission;
   if (!sub || sub.workflow_state !== "graded") return null;
-  
+
   if (sub.entered_score !== null && assignment.points_possible) {
     const pct = (sub.entered_score / assignment.points_possible) * 100;
     return `${Math.round(pct)}%`;
