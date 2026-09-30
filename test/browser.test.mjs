@@ -3,15 +3,56 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Browser, LoginRequiredError, isLoginUrl, isPersistableLmsCookieDomain, persistableLmsCookies } from "../lib/browser.mjs";
+import { Browser, LoginRequiredError, isLoginUrl, shouldAutoCloseLoginWindow, BOT_CHALLENGE_DETECT_JS, isAllowedLoginPopupUrl, isPersistableLmsCookieDomain, persistableLmsCookies } from "../lib/browser.mjs";
 
 test("isLoginUrl", () => {
   assert.ok(isLoginUrl("https://shibboleth.illinois.edu/idp/profile/SAML2/Redirect/SSO"));
   assert.ok(isLoginUrl("https://login.microsoftonline.com/x"));
   assert.ok(isLoginUrl("https://us.prairielearn.com/pl/login"));
   assert.ok(isLoginUrl("https://cs128.org/login?next=/"));
+  assert.ok(isLoginUrl("https://cs128.org/auth"));
+  assert.ok(isLoginUrl("https://cs128.org/auth?next=/my/gradebook"));
+  assert.ok(!isLoginUrl("https://cs128.org/my/gradebook"));
   assert.ok(!isLoginUrl("https://us.prairielearn.com/pl/course_instance/1/assessments"));
   assert.ok(!isLoginUrl("https://us.prairielearn.com/pl/course_instance/1/instructor/auth/permissions"));
+});
+
+test("shouldAutoCloseLoginWindow waits for SSO, not Cloudflare or the first cs128.org load", () => {
+  const targetUrl = "https://cs128.org/my/gradebook";
+  assert.equal(shouldAutoCloseLoginWindow({ url: targetUrl, targetUrl, sawLoginFlow: false }), false);
+  assert.equal(shouldAutoCloseLoginWindow({ url: targetUrl, targetUrl, sawLoginFlow: false, isChallenge: true }), false);
+  assert.equal(shouldAutoCloseLoginWindow({ url: "https://cs128.org/auth", targetUrl, sawLoginFlow: true }), false);
+  assert.equal(shouldAutoCloseLoginWindow({ url: "https://login.microsoftonline.com/x", targetUrl, sawLoginFlow: true }), false);
+  assert.equal(shouldAutoCloseLoginWindow({ url: targetUrl, targetUrl, sawLoginFlow: true, isChallenge: true }), false);
+  assert.equal(shouldAutoCloseLoginWindow({ url: targetUrl, targetUrl, sawLoginFlow: true, hasPassword: true }), false);
+  assert.equal(shouldAutoCloseLoginWindow({ url: targetUrl, targetUrl, sawLoginFlow: true }), true);
+});
+
+test("BOT_CHALLENGE_DETECT_JS recognizes Cloudflare interstitial HTML", () => {
+  const run = (document) => Function("globalThis", `return ${BOT_CHALLENGE_DETECT_JS}`)({ document });
+  assert.equal(run({
+    title: "Just a moment...",
+    querySelector: () => ({ id: "challenge-running" }),
+    body: { innerText: "" },
+  }), true);
+  assert.equal(run({
+    title: "Gradebook",
+    querySelector: () => null,
+    body: { innerText: "Lessons" },
+  }), false);
+});
+
+test("isAllowedLoginPopupUrl allows IdP and challenge hosts, not arbitrary sites", () => {
+  assert.equal(isAllowedLoginPopupUrl("about:blank"), true);
+  assert.equal(isAllowedLoginPopupUrl("https://login.microsoftonline.com/common/oauth2/v2.0/authorize"), true);
+  assert.equal(isAllowedLoginPopupUrl("https://device.login.microsoftonline.com/"), true);
+  assert.equal(isAllowedLoginPopupUrl("https://challenges.cloudflare.com/cdn-cgi/challenge-platform/x"), true);
+  assert.equal(isAllowedLoginPopupUrl("https://cs128.org/auth"), true);
+  assert.equal(isAllowedLoginPopupUrl("https://api.duosecurity.com/frame/v4/auth"), true);
+  assert.equal(isAllowedLoginPopupUrl("https://shibboleth.illinois.edu/idp/profile/SAML2/Redirect/SSO"), true);
+  assert.equal(isAllowedLoginPopupUrl("https://evil.example/phish"), false);
+  assert.equal(isAllowedLoginPopupUrl("javascript:alert(1)"), false);
+  assert.equal(isAllowedLoginPopupUrl("http://cs128.org/auth"), false);
 });
 
 test("isPersistableLmsCookieDomain keeps LMS hosts and drops IdP cookies", () => {
@@ -88,6 +129,17 @@ test("withPage runs fn when not a login page", async () => {
   const r = await b.withPage("https://us.prairielearn.com/pl/course_instance/1/assessments", async (p) => p.url());
   assert.match(r, /assessments/);
   assert.deepEqual(launched, [{ headless: true }]);
+});
+
+test("withPage throws LoginRequiredError on a Cloudflare interstitial", async () => {
+  const page = {
+    url: () => "https://cs128.org/my/gradebook",
+    goto: async () => {}, waitForLoadState: async () => {}, $: async () => null,
+    evaluate: async () => true,
+  };
+  const launch = async () => ({ pages: () => [page], newPage: async () => page, on: () => {}, close: async () => {}, cookies: async () => [], addCookies: async () => {} });
+  const b = new Browser({ profileDir: "/tmp/x", launch, log: () => {}, ssoWaitMs: 20, ssoPollMs: 1 });
+  await assert.rejects(b.withPage("https://cs128.org/my/gradebook", async () => "no"), LoginRequiredError);
 });
 
 test("withPage throws LoginRequiredError when SSO never comes back", async () => {
