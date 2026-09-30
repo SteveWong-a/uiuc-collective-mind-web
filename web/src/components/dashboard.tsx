@@ -24,6 +24,17 @@ import { Assignment } from "@/lib/schemas";
 
 type Toast = { id: string; message: string; type: "success" | "error" | "info" };
 
+function safeHttpUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === "https:" || parsed.protocol === "http:") return url;
+  } catch {
+    /* ignore invalid */
+  }
+  return undefined;
+}
+
 // Status glyphs — same as the original app
 const GLYPH: Record<string, string> = {
   open: "○",
@@ -99,6 +110,7 @@ function AssignmentRow({ a }: { a: Assignment }) {
   const pct = parsePercent(rawGrade);
   const overdue = checkOverdue(a);
   const cls = overdue ? "overdue" : ["graded", "submitted", "in_progress"].includes(a.status) ? "done" : a.status === "closed" ? "closed" : "";
+  const href = safeHttpUrl(a.url);
 
   return (
     <div
@@ -121,9 +133,9 @@ function AssignmentRow({ a }: { a: Assignment }) {
         {a.course}
       </span>
       <span className="min-w-0 font-medium">
-        {a.url && a.url !== "#" ? (
+        {href ? (
           <a
-            href={a.url}
+            href={href}
             target="_blank"
             rel="noopener noreferrer"
             className={`no-underline hover:underline hover:underline-offset-[3px] ${cls === "done" ? "text-[var(--color-muted)] line-through" : ""}`}
@@ -359,6 +371,7 @@ export default function Dashboard() {
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
       if (event.source !== window) return;
+      if (event.origin !== window.location.origin) return;
       if (event.data?.type === "CMIND_SYNC_RESPONSE") {
         const { payload } = event.data;
         if (payload?.success) {
@@ -426,7 +439,7 @@ export default function Dashboard() {
 
   const handleCanvasSync = useCallback(() => {
     setIsSyncing(true);
-    window.postMessage({ type: "CMIND_SYNC_REQUEST", source: "canvas", settings: appSettings }, "*");
+    window.postMessage({ type: "CMIND_SYNC_REQUEST", source: "canvas", settings: appSettings }, window.location.origin);
     
     setTimeout(() => {
       setIsSyncing((current) => {

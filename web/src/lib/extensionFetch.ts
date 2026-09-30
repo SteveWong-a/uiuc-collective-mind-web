@@ -10,6 +10,7 @@ export const fetchHtmlViaExtension = (url: string): Promise<string> => {
 
     const handler = (event: MessageEvent) => {
       if (event.source !== window) return;
+      if (event.origin !== window.location.origin) return;
       if (event.data?.type === "CMIND_FETCH_HTML_RESPONSE" && event.data.reqId === reqId) {
         window.removeEventListener("message", handler);
         clearTimeout(timeoutId);
@@ -23,6 +24,6 @@ export const fetchHtmlViaExtension = (url: string): Promise<string> => {
     };
     
     window.addEventListener("message", handler);
-    window.postMessage({ type: "CMIND_FETCH_HTML_REQUEST", reqId, url }, "*");
+    window.postMessage({ type: "CMIND_FETCH_HTML_REQUEST", reqId, url }, window.location.origin);
   });
 };

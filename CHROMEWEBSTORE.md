@@ -70,7 +70,9 @@ Google requires plain-English explanations for every permission declared in `man
 | `https://us.prairielearn.com/*` | Required to fetch the user's PrairieLearn assessment table when requested by the dashboard. |
 | `https://cs128.org/*` | Required to fetch CS 128 homework due dates for enrolled students. |
 | `https://smart.physics.illinois.edu/*` | Required to fetch PHYS 211/212 SmartPhysics homework assignments. |
-| `https://uiuc-collective-mind-web.vercel.app/*` | Required to communicate with the official UIUC Collective Mind web client via message passing. |
+| `https://uiuc-collective-mind-web.vercel.app/*` | Required to communicate with the official UIUC Collective Mind web client via message passing. Do **not** use `https://*.vercel.app/*` — any Vercel site could then drive the extension. |
+| `https://uiuc-cmind-2026.web.app/*` | Required for the Firebase Hosting web client. |
+| `https://uiuc-cmind-2026.firebaseapp.com/*` | Required for the Firebase Hosting web client. |
 | `http://localhost:3000/*` | Required for local development and testing. |
 
 ---
