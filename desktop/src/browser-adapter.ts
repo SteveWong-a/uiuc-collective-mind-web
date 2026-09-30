@@ -11,11 +11,42 @@ export class LoginRequiredError extends Error {
   }
 }
 
-const LOGIN_RE = /shibboleth\.illinois\.edu|login\.microsoftonline\.com|login\.illinois\.edu|lassso(?:\.las)?\.illinois\.edu|\/pl\/login|\/login(?:[/?#]|$)|\/logon(?:[/?#]|$)|\/Account\/|\/saml\//i;
+// Keep in sync with lib/browser.mjs. cs128.org SSO starts at /auth (not /login);
+// a bare /auth/ substring would false-positive PrairieLearn instructor URLs.
+const LOGIN_RE = /shibboleth\.illinois\.edu|login\.microsoftonline\.com|login\.illinois\.edu|lassso(?:\.las)?\.illinois\.edu|\/pl\/login|\/login(?:[/?#]|$)|\/logon(?:[/?#]|$)|\/Account\/|\/saml\/|cs128\.org\/auth(?:[/?#]|$)/i;
 export function isLoginUrl(url: string) { return LOGIN_RE.test(String(url)); }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const hostOf = (url: string) => { try { return new URL(String(url)).host; } catch { return null; } };
+
+// Cloudflare managed-challenge interstitial. Keep in sync with lib/browser.mjs.
+const BOT_CHALLENGE_DETECT_JS = `(() => {
+  const document = globalThis.document;
+  if (!document) return false;
+  if (/^just a moment/i.test(document.title || "")) return true;
+  if (document.querySelector("#challenge-running, #cf-challenge-running, #challenge-stage, iframe[src*='challenges.cloudflare.com']")) return true;
+  const text = (document.body && document.body.innerText) || "";
+  return /verify you are (?:a )?human|checking your browser before accessing/i.test(text);
+})()`;
+
+// Only auto-close the headed login window after a real SSO URL was seen and the
+// user is back on the target site. First paint of cs128.org is Cloudflare's
+// "Just a moment..." page on the gradebook URL — treating that as success
+// closed the window in ~1s. Keep in sync with lib/browser.mjs.
+export function shouldAutoCloseLoginWindow({ url, targetUrl, sawLoginFlow, hasPassword = false, hasSsoForm = false, isChallenge = false }: {
+  url: string;
+  targetUrl: string;
+  sawLoginFlow: boolean;
+  hasPassword?: boolean;
+  hasSsoForm?: boolean;
+  isChallenge?: boolean;
+}) {
+  if (!sawLoginFlow || isChallenge || hasPassword || hasSsoForm || isLoginUrl(url)) return false;
+  if (String(url).includes("login.aspx")) return false;
+  const host = hostOf(targetUrl);
+  if (host != null && hostOf(url) !== host) return false;
+  return true;
+}
 
 export class ElectronBrowser {
   profileDir: string;
@@ -42,6 +73,11 @@ export class ElectronBrowser {
   private async _ensureSession() {
     if (this._session) return this._session;
     this._session = session.fromPartition('persist:scraper');
+    // Electron's default UA includes "Electron/…" which Cloudflare challenges
+    // treat as a bot. Strip it so the headed login window can complete the
+    // "Just a moment..." / "Verify you are human" interstitial.
+    const ua = this._session.getUserAgent().replace(/\sElectron\/\S+/i, '');
+    this._session.setUserAgent(ua);
     await this._restoreCookies();
     return this._session;
   }
@@ -123,10 +159,16 @@ export class ElectronBrowser {
     } catch { /* ignore */ }
   }
 
+  private async _isBotChallenge(win: BrowserWindow): Promise<boolean> {
+    if (win.isDestroyed()) return false;
+    return !!(await win.webContents.executeJavaScript(BOT_CHALLENGE_DETECT_JS).catch(() => false));
+  }
+
   private async _settleLogin(win: BrowserWindow, targetUrl: string) {
     let currentUrl = win.webContents.getURL();
     const hasSsoForm = await win.webContents.executeJavaScript(`!!document.querySelector('form[action*="lassso"], form[action*="shibboleth"]')`).catch(() => false);
-    if (!isLoginUrl(currentUrl) && !hasSsoForm) {
+    const challenged = await this._isBotChallenge(win);
+    if (!isLoginUrl(currentUrl) && !hasSsoForm && !challenged) {
       const hasPassword = await win.webContents.executeJavaScript(`!!document.querySelector('input[type="password"]')`).catch(() => false);
       if (hasPassword) throw new LoginRequiredError(currentUrl);
       return;
@@ -139,6 +181,7 @@ export class ElectronBrowser {
       currentUrl = win.webContents.getURL();
       
       if (isLoginUrl(currentUrl)) continue;
+      if (await this._isBotChallenge(win)) continue;
       if (host !== null && hostOf(currentUrl) !== host) continue;
       
       const hasPassword = await win.webContents.executeJavaScript(`!!document.querySelector('input[type="password"]')`).catch(() => false);
@@ -274,6 +317,21 @@ export class ElectronBrowser {
     
     this._loginPage = win;
     this._headed = true;
+
+    // Microsoft / Cloudflare may open a popup from the login page. Keep it in
+    // the same cookie partition so verification can finish.
+    win.webContents.setWindowOpenHandler(() => ({
+      action: 'allow',
+      overrideBrowserWindowOptions: {
+        width: 1000,
+        height: 800,
+        webPreferences: {
+          session: sess,
+          nodeIntegration: false,
+          contextIsolation: true
+        }
+      }
+    }));
     
     win.on("closed", async () => {
       await this._saveCookies();
@@ -283,12 +341,12 @@ export class ElectronBrowser {
       }
     });
 
-    // Detect redirect loops and monitor successful login
+    // Detect redirect loops and close only after a real SSO round-trip.
     let loopNavCount = 0;
     let lastNavTime = Date.now();
-    const targetHost = hostOf(url);
+    let sawLoginFlow = false;
 
-    win.webContents.on("did-navigate", async (event, navUrl) => {
+    win.webContents.on("did-navigate", async (_event, navUrl) => {
       const now = Date.now();
       if (now - lastNavTime < 2000 && (navUrl.includes("login.aspx") || navUrl.includes("lassso"))) {
         loopNavCount++;
@@ -311,34 +369,46 @@ export class ElectronBrowser {
       }
       lastNavTime = now;
 
-      // Check if we reached the target authenticated page
-      if (targetHost && hostOf(navUrl) === targetHost && !isLoginUrl(navUrl) && !navUrl.includes("login.aspx")) {
-        const hasPassword = await win.webContents.executeJavaScript(`!!document.querySelector('input[type="password"]')`).catch(() => false);
-        const hasSsoForm = await win.webContents.executeJavaScript(`!!document.querySelector('form[action*="lassso"], form[action*="shibboleth"]')`).catch(() => false);
-        if (!hasPassword && !hasSsoForm) {
-          this.log(`Login confirmed (${navUrl}), saving cookies and closing window.`);
-          await this._saveCookies();
-          if (!win.isDestroyed()) {
-            win.close();
-          }
-        }
+      if (win.isDestroyed()) return;
+      if (isLoginUrl(navUrl)) sawLoginFlow = true;
+
+      // Cloudflare paints on the same cs128.org URL as the gradebook. Wait for
+      // the interstitial (or the real page) before deciding this navigation
+      // was a successful login.
+      await sleep(750);
+      if (win.isDestroyed()) return;
+
+      const currentUrl = win.webContents.getURL();
+      const isChallenge = await this._isBotChallenge(win);
+      const hasPassword = await win.webContents.executeJavaScript(`!!document.querySelector('input[type="password"]')`).catch(() => false);
+      const hasSsoForm = await win.webContents.executeJavaScript(`!!document.querySelector('form[action*="lassso"], form[action*="shibboleth"]')`).catch(() => false);
+      if (isLoginUrl(currentUrl) || hasPassword || hasSsoForm) sawLoginFlow = true;
+      if (!shouldAutoCloseLoginWindow({ url: currentUrl, targetUrl: url, sawLoginFlow, hasPassword, hasSsoForm, isChallenge })) {
+        return;
+      }
+
+      this.log(`Login confirmed (${currentUrl}), saving cookies and closing window.`);
+      await this._saveCookies();
+      if (!win.isDestroyed()) {
+        win.close();
       }
     });
     
     try {
       await win.loadURL(url);
-      // Wait for SSO redirect to settle if already authenticated
-      await this._settleLogin(win, url);
-      
-      this.log("Login confirmed, saving cookies and closing window.");
-      await this._saveCookies();
-      if (!win.isDestroyed()) {
-        win.close();
-      }
+      // If the session is already valid, leave the window open on the target
+      // page so the user can confirm. Never close here: loadURL resolves on
+      // Cloudflare's interstitial (same cs128.org URL, no password field),
+      // which used to look like "already logged in" and auto-close in ~1s.
+      await this._settleLogin(win, url).catch((err: any) => {
+        if (err?.name === "LoginRequiredError") {
+          this.log(`User login required in window: ${err.message}`);
+        } else if (!win.isDestroyed()) {
+          this.log(`Login window error: ${err.message}`);
+        }
+      });
     } catch (err: any) {
-      if (err.name === "LoginRequiredError") {
-        this.log(`User login required in window: ${err.message}`);
-      } else {
+      if (!win.isDestroyed()) {
         this.log(`Login window error: ${err.message}`);
       }
     }
