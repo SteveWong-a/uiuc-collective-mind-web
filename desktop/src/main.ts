@@ -7,10 +7,6 @@ import { setupAppMenu } from './menu';
 
 const nativeImport = new Function('mod', 'return import(mod)');
 
-// Must be set before ready. Helps Cloudflare's managed challenge complete in
-// the headed login window (cs128.org and other bot-gated course sites).
-app.commandLine.appendSwitch('disable-blink-features', 'AutomationControlled');
-
 let mainWindow: BrowserWindow | null = null;
 let appServices: any = null;
 let isQuitting = false;

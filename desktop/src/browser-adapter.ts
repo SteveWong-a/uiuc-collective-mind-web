@@ -1,4 +1,4 @@
-import { BrowserWindow, session } from 'electron';
+import { BrowserWindow, session, shell } from 'electron';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, chmodSync, renameSync } from 'node:fs';
 import { dirname } from 'node:path';
 
@@ -48,6 +48,59 @@ export function shouldAutoCloseLoginWindow({ url, targetUrl, sawLoginFlow, hasPa
   return true;
 }
 
+// Cookie JSON sidecar: LMS hosts only, never IdP. Keep in sync with lib/browser.mjs.
+const LMS_COOKIE_HOSTS = [
+  "canvas.illinois.edu",
+  "us.prairielearn.com",
+  "us.prairietest.com",
+  "cs128.org",
+  "smart.physics.illinois.edu",
+];
+
+function hostMatchesAllowed(host: string | undefined, allowed: string) {
+  const h = String(host || "").replace(/^\./, "").toLowerCase();
+  const a = String(allowed || "").replace(/^\./, "").toLowerCase();
+  if (!h || !a) return false;
+  return h === a || h.endsWith("." + a);
+}
+
+export function isPersistableLmsCookieDomain(domain: string | undefined) {
+  return LMS_COOKIE_HOSTS.some((allowed) => hostMatchesAllowed(domain, allowed));
+}
+
+const LOGIN_POPUP_HOSTS = [
+  "login.microsoftonline.com",
+  "login.microsoft.com",
+  "login.windows.net",
+  "login.live.com",
+  "msauth.net",
+  "msauthimages.net",
+  "microsoftazuread-sso.com",
+  "shibboleth.illinois.edu",
+  "login.illinois.edu",
+  "lassso.las.illinois.edu",
+  "lassso.illinois.edu",
+  "duosecurity.com",
+  "cloudflare.com",
+  "cs128.org",
+  "us.prairielearn.com",
+  "prairielearn.com",
+  "us.prairietest.com",
+  "prairietest.com",
+  "canvas.illinois.edu",
+  "smart.physics.illinois.edu",
+];
+
+export function isAllowedLoginPopupUrl(url: string) {
+  const raw = String(url || "").trim();
+  if (!raw || raw === "about:blank" || raw === "about:srcdoc") return true;
+  let parsed: URL;
+  try { parsed = new URL(raw); } catch { return false; }
+  if (parsed.protocol === "about:") return parsed.pathname === "blank" || parsed.pathname === "srcdoc";
+  if (parsed.protocol !== "https:") return false;
+  return LOGIN_POPUP_HOSTS.some((allowed) => hostMatchesAllowed(parsed.hostname, allowed));
+}
+
 export class ElectronBrowser {
   profileDir: string;
   cookieFile: string | null;
@@ -70,6 +123,44 @@ export class ElectronBrowser {
   
   get headed() { return this._headed; }
 
+  private _scraperWebPrefs(): Electron.WebPreferences {
+    return {
+      session: this._session!,
+      nodeIntegration: false,
+      contextIsolation: true,
+      // Login/scraper windows only — not the loopback UI.
+      disableBlinkFeatures: 'AutomationControlled',
+    };
+  }
+
+  private _loginPopupOpenHandler({ url }: { url: string }) {
+    if (!isAllowedLoginPopupUrl(url)) {
+      this.log(`Blocked login popup to ${url}`);
+      if (/^https:\/\//i.test(url)) shell.openExternal(url).catch(() => {});
+      return { action: 'deny' as const };
+    }
+    return {
+      action: 'allow' as const,
+      overrideBrowserWindowOptions: {
+        width: 1000,
+        height: 800,
+        webPreferences: this._scraperWebPrefs()
+      }
+    };
+  }
+
+  private _guardLoginPopupNavigations(child: BrowserWindow) {
+    const block = (event: Electron.Event, navUrl: string) => {
+      if (isAllowedLoginPopupUrl(navUrl)) return;
+      event.preventDefault();
+      this.log(`Blocked login popup navigation to ${navUrl}`);
+      if (/^https:\/\//i.test(navUrl)) shell.openExternal(navUrl).catch(() => {});
+    };
+    child.webContents.on('will-navigate', block);
+    child.webContents.on('will-redirect', block);
+    child.webContents.setWindowOpenHandler((details) => this._loginPopupOpenHandler(details));
+  }
+
   private async _ensureSession() {
     if (this._session) return this._session;
     this._session = session.fromPartition('persist:scraper');
@@ -91,6 +182,7 @@ export class ElectronBrowser {
       const cookieMap = new Map<string, any>();
       for (const cookie of cookies) {
         if (!cookie || !cookie.name) continue;
+        if (!isPersistableLmsCookieDomain(cookie.domain)) continue;
         const domainKey = (cookie.domain || "").replace(/^\./, "").toLowerCase();
         const key = `${cookie.name}|${domainKey}|${cookie.path || '/'}`;
         // Prefer exact host domain (without leading dot)
@@ -136,6 +228,7 @@ export class ElectronBrowser {
       const cookieMap = new Map<string, any>();
       for (const c of cookies) {
         if (!c || !c.name) continue;
+        if (!isPersistableLmsCookieDomain(c.domain)) continue;
         const domainKey = (c.domain || "").replace(/^\./, "").toLowerCase();
         const key = `${c.name}|${domainKey}|${c.path || '/'}`;
         if (!cookieMap.has(key) || !c.domain?.startsWith(".")) {
@@ -231,12 +324,9 @@ export class ElectronBrowser {
 
       const win = new BrowserWindow({
         show: false,
-        webPreferences: {
-          session: sess,
-          nodeIntegration: false,
-          contextIsolation: true
-        }
+        webPreferences: this._scraperWebPrefs()
       });
+      win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
 
       try {
         await win.loadURL(url);
@@ -308,30 +398,18 @@ export class ElectronBrowser {
       height: 800,
       show: true,
       title: "Log in - UIUC Collective Mind",
-      webPreferences: {
-        session: sess,
-        nodeIntegration: false,
-        contextIsolation: true
-      }
+      webPreferences: this._scraperWebPrefs()
     });
     
     this._loginPage = win;
     this._headed = true;
 
-    // Microsoft / Cloudflare may open a popup from the login page. Keep it in
-    // the same cookie partition so verification can finish.
-    win.webContents.setWindowOpenHandler(() => ({
-      action: 'allow',
-      overrideBrowserWindowOptions: {
-        width: 1000,
-        height: 800,
-        webPreferences: {
-          session: sess,
-          nodeIntegration: false,
-          contextIsolation: true
-        }
-      }
-    }));
+    // Microsoft / Cloudflare / Duo may open a popup. Only known IdP and
+    // challenge hosts share persist:scraper; everything else is denied.
+    win.webContents.setWindowOpenHandler((details) => this._loginPopupOpenHandler(details));
+    win.webContents.on('did-create-window', (child) => {
+      this._guardLoginPopupNavigations(child);
+    });
     
     win.on("closed", async () => {
       await this._saveCookies();

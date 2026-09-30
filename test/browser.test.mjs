@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Browser, LoginRequiredError, isLoginUrl, shouldAutoCloseLoginWindow, BOT_CHALLENGE_DETECT_JS } from "../lib/browser.mjs";
+import { Browser, LoginRequiredError, isLoginUrl, shouldAutoCloseLoginWindow, BOT_CHALLENGE_DETECT_JS, isAllowedLoginPopupUrl, isPersistableLmsCookieDomain } from "../lib/browser.mjs";
 
 test("isLoginUrl", () => {
   assert.ok(isLoginUrl("https://shibboleth.illinois.edu/idp/profile/SAML2/Redirect/SSO"));
@@ -40,6 +40,30 @@ test("BOT_CHALLENGE_DETECT_JS recognizes Cloudflare interstitial HTML", () => {
     querySelector: () => null,
     body: { innerText: "Lessons" },
   }), false);
+});
+
+test("isAllowedLoginPopupUrl allows IdP and challenge hosts, not arbitrary sites", () => {
+  assert.equal(isAllowedLoginPopupUrl("about:blank"), true);
+  assert.equal(isAllowedLoginPopupUrl("https://login.microsoftonline.com/common/oauth2/v2.0/authorize"), true);
+  assert.equal(isAllowedLoginPopupUrl("https://device.login.microsoftonline.com/"), true);
+  assert.equal(isAllowedLoginPopupUrl("https://challenges.cloudflare.com/cdn-cgi/challenge-platform/x"), true);
+  assert.equal(isAllowedLoginPopupUrl("https://cs128.org/auth"), true);
+  assert.equal(isAllowedLoginPopupUrl("https://api.duosecurity.com/frame/v4/auth"), true);
+  assert.equal(isAllowedLoginPopupUrl("https://shibboleth.illinois.edu/idp/profile/SAML2/Redirect/SSO"), true);
+  assert.equal(isAllowedLoginPopupUrl("https://evil.example/phish"), false);
+  assert.equal(isAllowedLoginPopupUrl("javascript:alert(1)"), false);
+  assert.equal(isAllowedLoginPopupUrl("http://cs128.org/auth"), false);
+});
+
+test("isPersistableLmsCookieDomain keeps LMS hosts and drops IdP cookies", () => {
+  assert.equal(isPersistableLmsCookieDomain(".cs128.org"), true);
+  assert.equal(isPersistableLmsCookieDomain("us.prairielearn.com"), true);
+  assert.equal(isPersistableLmsCookieDomain("canvas.illinois.edu"), true);
+  assert.equal(isPersistableLmsCookieDomain("smart.physics.illinois.edu"), true);
+  assert.equal(isPersistableLmsCookieDomain("shibboleth.illinois.edu"), false);
+  assert.equal(isPersistableLmsCookieDomain("login.microsoftonline.com"), false);
+  assert.equal(isPersistableLmsCookieDomain("login.illinois.edu"), false);
+  assert.equal(isPersistableLmsCookieDomain("notcs128.org"), false);
 });
 
 function fakeLaunch(landing, hasPassword = false) {
