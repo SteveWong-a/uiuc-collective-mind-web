@@ -82,7 +82,7 @@ if (!gotTheLock) {
       setupAppMenu(mainWindow, openSettings, triggerPoll);
       if (mainWindow && !mainWindow.isDestroyed()) {
         setupTray(mainWindow, triggerPoll, openSettings);
-        mainWindow.loadURL(appServices.url).catch(e => {
+        mainWindow.loadURL(`${appServices.url}/?t=${encodeURIComponent(appServices.apiToken)}`).catch(e => {
           console.error("loadURL failed", e);
         });
       }

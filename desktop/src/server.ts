@@ -20,6 +20,7 @@ export async function initServer(onStateChange: (state: any) => void) {
   const { bus, log, recentLog } = await nativeImport(libPath('log.mjs'));
   const { Store } = await nativeImport(libPath('store.mjs'));
   const { Poller } = await nativeImport(libPath('poller.mjs'));
+  const { loadOrCreateApiToken } = await nativeImport(libPath('api-auth.mjs'));
   const { fetchCanvasAuto } = await nativeImport(libPath('sources/canvas.mjs'));
   const { fetchPrairieLearn } = await nativeImport(libPath('sources/prairielearn.mjs'));
   const { fetchCs128 } = await nativeImport(libPath('sources/cs128.mjs'));
@@ -100,6 +101,8 @@ export async function initServer(onStateChange: (state: any) => void) {
     bus
   });
 
+  const apiToken = loadOrCreateApiToken(path.join(dataDir, "api-token"));
+
   const publicDir = isProd ? path.join(rootPath, 'public') : path.join(__dirname, '../../public');
 
   const server = createServer({ 
@@ -111,7 +114,8 @@ export async function initServer(onStateChange: (state: any) => void) {
     bus, 
     log, 
     recentLog, 
-    publicDir 
+    publicDir,
+    apiToken,
   });
 
   // Proxy state events to Electron main process
@@ -136,6 +140,7 @@ export async function initServer(onStateChange: (state: any) => void) {
       resolve({
         url,
         port: actualPort,
+        apiToken,
         poller,
         browser,
         server,

@@ -120,13 +120,16 @@ export default function DownloadPage() {
             </a>
           </div>
 
-          <div className="mt-4 max-w-lg mx-auto p-3 bg-[var(--color-wash)] border border-[var(--color-rule)] text-left" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.02)" }}>
+          <div className="mt-4 max-w-lg mx-auto p-3 bg-[var(--color-wash)] border border-[var(--color-rule)] text-left" style={{ boxShadow: "0 2px 6px rgba(0,0,0,0.02)" }}>
             <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--color-muted)] font-[600] mb-1">
-              Terminal One-Line Install (Bypasses Browser Quarantine):
+              Terminal one-line install:
             </div>
             <div className="bg-[var(--color-paper)] border border-[var(--color-rule)] p-2 font-mono text-[11px] select-all overflow-x-auto text-[var(--color-ink)]">
               curl -fsSL https://uiuc-collective-mind-web.vercel.app/install.sh | bash
             </div>
+            <p className="text-[11px] text-[var(--color-muted)] mt-2 m-0 leading-relaxed">
+              Prefer downloading the <code>.dmg</code> in your browser so Gatekeeper quarantine stays attached. The installer does not strip quarantine. A notarized build is the long-term path; until then, open the app with <strong>right-click → Open</strong>.
+            </p>
           </div>
 
           <p className="text-[13px] text-[var(--color-muted)] mt-4">
@@ -281,17 +284,14 @@ export default function DownloadPage() {
                     </span>
                   </div>
 
-                  {/* Troubleshooting for Damaged / Trash message */}
+                  {/* Troubleshooting if Gatekeeper blocks first launch */}
                   <div className="mt-3 pt-3 border-t border-[var(--color-rule)] bg-[var(--color-wash)] p-3 border">
                     <div className="font-[700] text-[var(--color-ink)] text-[12px] uppercase tracking-wider font-mono mb-1">
-                      If macOS says &quot;App is damaged and can&apos;t be opened&quot;:
+                      If macOS says the app can&apos;t be opened:
                     </div>
-                    <p className="text-[12px] text-[var(--color-muted)] m-0 mb-2">
-                      On macOS Sequoia and Sonoma, Apple Gatekeeper attaches a quarantine attribute (<code>com.apple.quarantine</code>) to open-source apps downloaded outside the App Store. Run this single command in <strong>Terminal</strong> to clear it:
+                    <p className="text-[12px] text-[var(--color-muted)] m-0">
+                      That is Gatekeeper doing its job on an unsigned or not-yet-notarized build. Do <strong>not</strong> strip quarantine attributes. Use <strong>right-click → Open</strong>, or <em>System Settings → Privacy &amp; Security → Open Anyway</em>. Notarized releases will not need a workaround.
                     </p>
-                    <div className="bg-[var(--color-paper)] border border-[var(--color-rule)] p-2 font-mono text-[12px] select-all overflow-x-auto text-[var(--color-ink)]">
-                      xattr -cr &quot;/Applications/UIUC Collective Mind.app&quot;
-                    </div>
                   </div>
 
                   <div className="text-[11px] text-[var(--color-muted)] pt-1">

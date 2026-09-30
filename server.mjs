@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { execFile } from "node:child_process";
 import { loadSettings, saveSettings, maskSettings } from "./lib/settings.mjs";
+import { loadOrCreateApiToken, hasValidApiToken, apiCookieHeader, tokensEqual, isBrowserLikeMissingOrigin } from "./lib/api-auth.mjs";
 import { bus as realBus, log as realLog, recentLog as realRecent } from "./lib/log.mjs";
 import { Store } from "./lib/store.mjs";
 import { Poller, sourceKey } from "./lib/poller.mjs";
@@ -39,7 +40,7 @@ function readBody(req) {
 // Only this machine may talk to the server: localhost, 127.0.0.1, or any
 // *.localhost name (browsers resolve those to 127.0.0.1 without any setup).
 export function isLocalHostname(h) { return h === "localhost" || h === "127.0.0.1" || /^[a-z0-9-]+(\.[a-z0-9-]+)*\.localhost$/i.test(h); }
-function isAllowedOrigin(req, port) {
+export function isAllowedOrigin(req, port) {
   const host = req.headers.host;
   if (!host) return false;
   const m = host.match(/^(.+?)(?::(\d+))?$/);
@@ -63,7 +64,8 @@ export function sourceUrl(cfg, settings = {}) {
   return null;
 }
 
-export function createServer({ store, settingsFile, poller, browser, google, bus, log, recentLog, publicDir }) {
+export function createServer({ store, settingsFile, poller, browser, google, bus, log, recentLog, publicDir, apiToken }) {
+  if (!apiToken || typeof apiToken !== "string") throw new Error("apiToken is required");
   const settings = () => loadSettings(settingsFile);
   let returnTo = "/";
   const statePayload = () => ({
@@ -82,9 +84,29 @@ export function createServer({ store, settingsFile, poller, browser, google, bus
       const url = new URL(req.url, "http://localhost");
       path = url.pathname;
       if (m === "GET" && (path === "/" || path === "/index.html")) {
+        const t = url.searchParams.get("t");
+        if (t && tokensEqual(t, apiToken)) {
+          res.writeHead(302, {
+            location: path,
+            "set-cookie": apiCookieHeader(apiToken),
+            "cache-control": "no-store",
+            "referrer-policy": "same-origin",
+          });
+          return res.end();
+        }
         const html = readFileSync(join(publicDir, "index.html"));
-        res.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" });
+        const headers = {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "no-store",
+          "referrer-policy": "same-origin",
+        };
+        if (hasValidApiToken(req, apiToken)) headers["set-cookie"] = apiCookieHeader(apiToken);
+        res.writeHead(200, headers);
         return res.end(html);
+      }
+      if (path.startsWith("/api/")) {
+        if (isBrowserLikeMissingOrigin(req)) return json(res, 403, { error: "forbidden origin" });
+        if (!hasValidApiToken(req, apiToken)) return json(res, 401, { error: "unauthorized" });
       }
       if (m === "GET" && path === "/api/state") return json(res, 200, statePayload());
       if (m === "GET" && path === "/api/events") {
@@ -210,13 +232,14 @@ export async function main() {
     log: realLog,
     bus: realBus,
   });
-  const server = createServer({ store, settingsFile, poller, browser, google: { auth }, bus: realBus, log: realLog, recentLog: realRecent, publicDir: join(ROOT, "public") });
+  const apiToken = loadOrCreateApiToken(join(ROOT, "data", "api-token"));
+  const server = createServer({ store, settingsFile, poller, browser, google: { auth }, bus: realBus, log: realLog, recentLog: realRecent, publicDir: join(ROOT, "public"), apiToken });
   const port = getSettings().port;
   server.on("error", (e) => { if (e.code === "EADDRINUSE") { console.error(`\nPort ${port} in use. Set a different "port" in settings.json.\n`); process.exit(1); } throw e; });
   server.listen(port, "127.0.0.1", () => {
-    const url = `http://${getSettings().appHost}:${port}`;
-    realLog(`listening on ${url}`);
-    if (!process.env.UCM_NO_OPEN) openBrowser(url);
+    const host = getSettings().appHost;
+    realLog(`listening on http://${host}:${port}`);
+    if (!process.env.UCM_NO_OPEN) openBrowser(`http://${host}:${port}/?t=${apiToken}`);
     poller.start();
   });
   const shutdown = async () => { poller.stop(); await browser.close(); server.close(); process.exit(0); };
