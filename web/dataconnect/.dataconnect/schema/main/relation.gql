@@ -130,6 +130,15 @@ extend type Assignment {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Assignment.url", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `Assignment` table where the `userUid` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  userUid_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Assignment.userUid", purpose: QUERY_COUNT)
+  """
   ✨ Minimum of the `dueDate` field in the `Assignment` table.
   """
   dueDate_min: Timestamp @fdc_generated(from: "Assignment.dueDate", purpose: QUERY_MIN)
@@ -140,7 +149,7 @@ extend type Assignment {
   """
   A generated field that is used for caching results in SDKs.
   """
-  _id: ID! @fdc_generated(from: "Assignment.externalId", purpose: ENTITY_ID)
+  _id: ID! @fdc_generated(from: "Assignment.userUid,externalId", purpose: ENTITY_ID)
 }
 extend type Course {
   """
@@ -301,6 +310,40 @@ extend type Enrollment {
 }
 extend type User {
   """
+  ✨ List `Assignment` objects in a one-to-many relationship (where `Assignment`.`user` is this object).
+  """
+  assignments_on_user(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: Assignment_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [Assignment_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: Assignment_Having
+  ): [Assignment!]! @fdc_generated(from: "Assignment.user", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
   ✨ List `Enrollment` objects in a one-to-many relationship (where `Enrollment`.`user` is this object).
   """
   enrollments_on_user(
@@ -445,6 +488,15 @@ extend type User {
   """
   _count: Int! @fdc_generated(from: "User.", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `User` table where the `canvasToken` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  canvasToken_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.canvasToken", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `User` table where the `courseConfigs` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   courseConfigs_count(
@@ -462,6 +514,15 @@ extend type User {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "User.email", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `prairieLearnToken` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  prairieLearnToken_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.prairieLearnToken", purpose: QUERY_COUNT)
   """
   ✨ Count the number of rows in the `User` table where the `uid` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
@@ -495,6 +556,15 @@ extend type UserAssignment {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "UserAssignment.assignmentExternalId", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `UserAssignment` table where the `assignmentUserUid` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  assignmentUserUid_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "UserAssignment.assignmentUserUid", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `UserAssignment` table where the `score` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   score_count(
@@ -524,5 +594,5 @@ extend type UserAssignment {
   """
   A generated field that is used for caching results in SDKs.
   """
-  _id: ID! @fdc_generated(from: "UserAssignment.userUid,assignmentExternalId", purpose: ENTITY_ID)
+  _id: ID! @fdc_generated(from: "UserAssignment.userUid,assignmentUserUid,assignmentExternalId", purpose: ENTITY_ID)
 }

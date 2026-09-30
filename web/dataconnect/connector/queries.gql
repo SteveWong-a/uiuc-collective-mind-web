@@ -20,6 +20,8 @@ query MyAssignments @auth(level: USER) {
       title
       dueDate
       externalId
+      url
+      source
       course {
         name
       }

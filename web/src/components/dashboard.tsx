@@ -8,7 +8,8 @@ import {
   upsertCourse, 
   addEnrollment, 
   upsertAssignment, 
-  upsertUserAssignment 
+  upsertUserAssignment,
+  type MyAssignmentsData,
 } from "@/lib/dataconnect";
 import { dataConnect } from "@/lib/firebase";
 import { fetchHtmlViaExtension } from "@/lib/extensionFetch";
@@ -21,6 +22,7 @@ import Link from "next/link";
 import ExtensionGuideDialog from "@/components/extension-guide-dialog";
 import LoginDialog from "@/components/login-dialog";
 import { Assignment } from "@/lib/schemas";
+import { safeHttpUrl } from "@/lib/safe-url";
 
 type Toast = { id: string; message: string; type: "success" | "error" | "info" };
 
@@ -94,11 +96,27 @@ function checkOverdue(a: Assignment, now = Date.now()) {
   return a.status === "open" || a.status === "unknown";
 }
 
+function assignmentsFromUserAssignments(
+  uas: MyAssignmentsData["userAssignments"]
+): Assignment[] {
+  return uas.map((ua) => ({
+    id: ua.assignment.externalId,
+    course: ua.assignment.course.name,
+    title: ua.assignment.title,
+    dueAt: ua.assignment.dueDate || null,
+    status: (ua.status as Assignment["status"]) || "open",
+    grade: ua.score || null,
+    url: safeHttpUrl(ua.assignment.url),
+    source: ua.assignment.source || "unknown",
+  }));
+}
+
 function AssignmentRow({ a }: { a: Assignment }) {
   const rawGrade = getScore(a);
   const pct = parsePercent(rawGrade);
   const overdue = checkOverdue(a);
   const cls = overdue ? "overdue" : ["graded", "submitted", "in_progress"].includes(a.status) ? "done" : a.status === "closed" ? "closed" : "";
+  const href = safeHttpUrl(a.url);
 
   return (
     <div
@@ -121,9 +139,9 @@ function AssignmentRow({ a }: { a: Assignment }) {
         {a.course}
       </span>
       <span className="min-w-0 font-medium">
-        {a.url && a.url !== "#" ? (
+        {href ? (
           <a
-            href={a.url}
+            href={href}
             target="_blank"
             rel="noopener noreferrer"
             className={`no-underline hover:underline hover:underline-offset-[3px] ${cls === "done" ? "text-[var(--color-muted)] line-through" : ""}`}
@@ -258,17 +276,7 @@ export default function Dashboard() {
         
         const assignmentsRes = await myAssignments(dataConnect);
         if (assignmentsRes.data?.userAssignments) {
-          const loaded: Assignment[] = assignmentsRes.data.userAssignments.map(ua => ({
-            id: ua.assignment.externalId,
-            course: ua.assignment.course.name,
-            title: ua.assignment.title,
-            dueAt: ua.assignment.dueDate || null,
-            status: (ua.status as any) || "open",
-            grade: ua.score || null,
-            url: (ua.assignment as any).url || "#",
-            source: (ua.assignment as any).source || "unknown",
-          }));
-          setAssignments(loaded);
+          setAssignments(assignmentsFromUserAssignments(assignmentsRes.data.userAssignments));
         }
       } catch (err) {
         console.error("Failed to load Data Connect data:", err);
@@ -341,7 +349,7 @@ export default function Dashboard() {
           title: a.title,
           dueDate: a.dueAt || null,
           externalId: a.id,
-          url: a.url,
+          url: safeHttpUrl(a.url),
           source: a.source
         });
         await upsertUserAssignment(dataConnect, {
@@ -368,17 +376,7 @@ export default function Dashboard() {
             // Reload all assignments from DB
             const assignmentsRes = await myAssignments(dataConnect);
             if (assignmentsRes.data?.userAssignments) {
-              const loaded: Assignment[] = assignmentsRes.data.userAssignments.map(ua => ({
-                id: ua.assignment.externalId,
-                course: ua.assignment.course.name,
-                title: ua.assignment.title,
-                dueAt: ua.assignment.dueDate || null,
-                status: (ua.status as any) || "open",
-                grade: ua.score || null,
-                url: (ua.assignment as any).url || "#",
-                source: (ua.assignment as any).source || "unknown",
-              }));
-              setAssignments(loaded);
+              setAssignments(assignmentsFromUserAssignments(assignmentsRes.data.userAssignments));
             }
             addToast(`Successfully synced and saved ${payload.data.length} assignments!`, "success");
           } catch (err) {
@@ -460,17 +458,7 @@ export default function Dashboard() {
         await saveAssignmentsToDB(allAssignments);
         const assignmentsRes = await myAssignments(dataConnect);
         if (assignmentsRes.data?.userAssignments) {
-          const loaded: Assignment[] = assignmentsRes.data.userAssignments.map(ua => ({
-            id: ua.assignment.externalId,
-            course: ua.assignment.course.name,
-            title: ua.assignment.title,
-            dueAt: ua.assignment.dueDate || null,
-            status: (ua.status as any) || "open",
-            grade: ua.score || null,
-            url: (ua.assignment as any).url || "#",
-            source: (ua.assignment as any).source || "unknown",
-          }));
-          setAssignments(loaded);
+          setAssignments(assignmentsFromUserAssignments(assignmentsRes.data.userAssignments));
         }
         addToast(`Successfully synced ${allAssignments.length} assignments from PrairieLearn!`, "success");
       } else {
@@ -510,17 +498,7 @@ export default function Dashboard() {
         await saveAssignmentsToDB(allAssignments);
         const assignmentsRes = await myAssignments(dataConnect);
         if (assignmentsRes.data?.userAssignments) {
-          const loaded: Assignment[] = assignmentsRes.data.userAssignments.map(ua => ({
-            id: ua.assignment.externalId,
-            course: ua.assignment.course.name,
-            title: ua.assignment.title,
-            dueAt: ua.assignment.dueDate || null,
-            status: (ua.status as any) || "open",
-            grade: ua.score || null,
-            url: (ua.assignment as any).url || "#",
-            source: (ua.assignment as any).source || "unknown",
-          }));
-          setAssignments(loaded);
+          setAssignments(assignmentsFromUserAssignments(assignmentsRes.data.userAssignments));
         }
         addToast(`Successfully synced ${allAssignments.length} assignments from Custom Sources!`, "success");
       } else {
