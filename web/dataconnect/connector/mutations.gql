@@ -19,8 +19,12 @@ mutation AddEnrollment($courseName: String!) @auth(level: USER) {
   })
 }
 
-mutation UpsertAssignment($courseName: String!, $title: String!, $dueDate: Timestamp, $externalId: String!, $url: String, $source: String) @auth(level: USER) {
+# Owner is always auth.uid, so a caller cannot upsert another student's row.
+# Reject javascript:/data: (and anything else that is not http(s)) at the API.
+mutation UpsertAssignment($courseName: String!, $title: String!, $dueDate: Timestamp, $externalId: String!, $url: String, $source: String)
+@auth(expr: "auth != null && auth.token.firebase.sign_in_provider != 'anonymous' && (!has(vars.url) || vars.url == null || vars.url.size() == 0 || vars.url.lowerAscii().startsWith('https://') || vars.url.lowerAscii().startsWith('http://'))") {
   assignment_upsert(data: {
+    user: { uid_expr: "auth.uid" },
     externalId: $externalId,
     course: { name: $courseName },
     title: $title,
@@ -33,7 +37,7 @@ mutation UpsertAssignment($courseName: String!, $title: String!, $dueDate: Times
 mutation UpsertUserAssignment($assignmentExternalId: String!, $score: String, $status: String) @auth(level: USER) {
   userAssignment_upsert(data: {
     user: { uid_expr: "auth.uid" },
-    assignment: { externalId: $assignmentExternalId },
+    assignment: { userUid_expr: "auth.uid", externalId: $assignmentExternalId },
     score: $score,
     status: $status
   })

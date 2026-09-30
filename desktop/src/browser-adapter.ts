@@ -68,6 +68,14 @@ export function isPersistableLmsCookieDomain(domain: string | undefined) {
   return LMS_COOKIE_HOSTS.some((allowed) => hostMatchesAllowed(domain, allowed));
 }
 
+function cookieDomainOf(cookie: { domain?: string; url?: string }) {
+  if (cookie?.domain) return String(cookie.domain);
+  if (cookie?.url) {
+    try { return new URL(cookie.url).hostname; } catch { return ""; }
+  }
+  return "";
+}
+
 const LOGIN_POPUP_HOSTS = [
   "login.microsoftonline.com",
   "login.microsoft.com",
@@ -182,7 +190,7 @@ export class ElectronBrowser {
       const cookieMap = new Map<string, any>();
       for (const cookie of cookies) {
         if (!cookie || !cookie.name) continue;
-        if (!isPersistableLmsCookieDomain(cookie.domain)) continue;
+        if (!isPersistableLmsCookieDomain(cookieDomainOf(cookie))) continue;
         const domainKey = (cookie.domain || "").replace(/^\./, "").toLowerCase();
         const key = `${cookie.name}|${domainKey}|${cookie.path || '/'}`;
         // Prefer exact host domain (without leading dot)
@@ -228,7 +236,7 @@ export class ElectronBrowser {
       const cookieMap = new Map<string, any>();
       for (const c of cookies) {
         if (!c || !c.name) continue;
-        if (!isPersistableLmsCookieDomain(c.domain)) continue;
+        if (!isPersistableLmsCookieDomain(cookieDomainOf(c))) continue;
         const domainKey = (c.domain || "").replace(/^\./, "").toLowerCase();
         const key = `${c.name}|${domainKey}|${c.path || '/'}`;
         if (!cookieMap.has(key) || !c.domain?.startsWith(".")) {

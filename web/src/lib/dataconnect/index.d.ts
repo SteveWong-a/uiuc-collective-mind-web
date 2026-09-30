@@ -19,6 +19,7 @@ export interface AddEnrollmentVariables {
 }
 
 export interface Assignment_Key {
+  userUid: string;
   externalId: string;
   __typename?: 'Assignment_Key';
 }
@@ -48,10 +49,12 @@ export interface MyAssignmentsData {
       title: string;
       dueDate?: TimestampString | null;
       externalId: string;
+      url?: string | null;
+      source?: string | null;
       course: {
         name: string;
       } & Course_Key;
-    } & Assignment_Key;
+    };
     score?: string | null;
     status?: string | null;
   })[];
@@ -107,6 +110,7 @@ export interface UpsertUserVariables {
 
 export interface UserAssignment_Key {
   userUid: string;
+  assignmentUserUid: string;
   assignmentExternalId: string;
   __typename?: 'UserAssignment_Key';
 }

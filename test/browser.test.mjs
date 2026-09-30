@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Browser, LoginRequiredError, isLoginUrl, shouldAutoCloseLoginWindow, BOT_CHALLENGE_DETECT_JS, isAllowedLoginPopupUrl, isPersistableLmsCookieDomain } from "../lib/browser.mjs";
+import { Browser, LoginRequiredError, isLoginUrl, shouldAutoCloseLoginWindow, BOT_CHALLENGE_DETECT_JS, isAllowedLoginPopupUrl, isPersistableLmsCookieDomain, persistableLmsCookies } from "../lib/browser.mjs";
 
 test("isLoginUrl", () => {
   assert.ok(isLoginUrl("https://shibboleth.illinois.edu/idp/profile/SAML2/Redirect/SSO"));
@@ -60,10 +60,23 @@ test("isPersistableLmsCookieDomain keeps LMS hosts and drops IdP cookies", () =>
   assert.equal(isPersistableLmsCookieDomain("us.prairielearn.com"), true);
   assert.equal(isPersistableLmsCookieDomain("canvas.illinois.edu"), true);
   assert.equal(isPersistableLmsCookieDomain("smart.physics.illinois.edu"), true);
+  assert.equal(isPersistableLmsCookieDomain("us.prairietest.com"), true);
   assert.equal(isPersistableLmsCookieDomain("shibboleth.illinois.edu"), false);
   assert.equal(isPersistableLmsCookieDomain("login.microsoftonline.com"), false);
   assert.equal(isPersistableLmsCookieDomain("login.illinois.edu"), false);
   assert.equal(isPersistableLmsCookieDomain("notcs128.org"), false);
+  assert.equal(isPersistableLmsCookieDomain(".illinois.edu"), false);
+});
+
+test("persistableLmsCookies drops IdP and campus-wide illinois.edu cookies", () => {
+  const kept = persistableLmsCookies([
+    { name: "session", value: "abc", domain: "cs128.org" },
+    { name: "pl", value: "tok", domain: ".us.prairielearn.com" },
+    { name: "idp", value: "secret", domain: "shibboleth.illinois.edu" },
+    { name: "ms", value: "x", domain: "login.microsoftonline.com" },
+    { name: "too-broad", value: "y", domain: ".illinois.edu" },
+  ]);
+  assert.deepEqual(kept.map((c) => c.name), ["session", "pl"]);
 });
 
 function fakeLaunch(landing, hasPassword = false) {
@@ -204,6 +217,24 @@ test("cookies are written after a success and restored on the next launch", asyn
   await b.close();
   await b.withPage("https://cs128.org/hw", async () => 1);
   assert.deepEqual(added, [jar], "the saved jar is re-added to the fresh context");
+});
+
+test("cookie sidecar never persists Illinois SSO or Microsoft IdP cookies", async () => {
+  const cookieFile = join(mkdtempSync(join(tmpdir(), "ucm-")), "cookies.json");
+  const mixed = [
+    { name: "session", value: "abc", domain: "cs128.org" },
+    { name: "idp", value: "shib", domain: "shibboleth.illinois.edu" },
+    { name: "ms", value: "aad", domain: ".login.microsoftonline.com" },
+  ];
+  const { launch, added } = multiPageLaunch({ cookies: mixed });
+  const b = new Browser({ profileDir: "/tmp/x", launch, log: () => {}, cookieFile });
+
+  await b.withPage("https://cs128.org/hw", async () => 1);
+  assert.deepEqual(JSON.parse(readFileSync(cookieFile, "utf8")), [{ name: "session", value: "abc", domain: "cs128.org" }]);
+
+  await b.close();
+  await b.withPage("https://cs128.org/hw", async () => 1);
+  assert.deepEqual(added, [[{ name: "session", value: "abc", domain: "cs128.org" }]]);
 });
 
 test("releaseIdle closes a headless context but never a headed one", async () => {
