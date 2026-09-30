@@ -295,10 +295,12 @@ export interface MyAssignmentsData {
       title: string;
       dueDate?: TimestampString | null;
       externalId: string;
+      url?: string | null;
+      source?: string | null;
       course: {
         name: string;
       } & Course_Key;
-    } & Assignment_Key;
+    };
     score?: string | null;
     status?: string | null;
   })[];

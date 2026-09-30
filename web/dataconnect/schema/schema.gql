@@ -15,7 +15,10 @@ type Enrollment @table(key: ["user", "course"]) {
   course: Course!
 }
 
-type Assignment @table(key: "externalId") {
+# Per-user rows: the same Canvas/PL externalId can exist once per student.
+# Title, due date, and URL are not a shared global catalog.
+type Assignment @table(key: ["user", "externalId"]) {
+  user: User!
   externalId: String!
   course: Course!
   title: String!

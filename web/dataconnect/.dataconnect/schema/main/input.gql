@@ -33,6 +33,14 @@ scalar UserAssignment_KeyOutput
 """
 input Assignment_Data {
   """
+  ✨ Generated from Field `Assignment`.`userUid` of type `String!`
+  """
+  userUid: String
+  """
+  ✨ `_expr` server value variant of `userUid` (✨ Generated from Field `Assignment`.`userUid` of type `String!`)
+  """
+  userUid_expr: String_Expr @fdc_forbiddenInVariables
+  """
   ✨ Generated from Field `Assignment`.`externalId` of type `String!`
   """
   externalId: String
@@ -40,6 +48,10 @@ input Assignment_Data {
   ✨ `_expr` server value variant of `externalId` (✨ Generated from Field `Assignment`.`externalId` of type `String!`)
   """
   externalId_expr: String_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `Assignment`.`user` of type `User!`
+  """
+  user: User_Key @fdc_forbiddenInVariables
   """
   ✨ Generated from Field `Assignment`.`courseName` of type `String!`
   """
@@ -114,9 +126,17 @@ input Assignment_Filter {
   """
   _or: [Assignment_Filter!]
   """
+  ✨ Generated from Field `Assignment`.`userUid` of type `String!`
+  """
+  userUid: String_Filter
+  """
   ✨ Generated from Field `Assignment`.`externalId` of type `String!`
   """
   externalId: String_Filter
+  """
+  ✨ Generated from Field `Assignment`.`user` of type `User!`
+  """
+  user: User_Filter
   """
   ✨ Generated from Field `Assignment`.`courseName` of type `String!`
   """
@@ -212,6 +232,10 @@ input Assignment_Having {
   """
   url_count: Int_Filter
   """
+  ✨ Generated from Field `Assignment`.`userUid_count` of type `Int!`
+  """
+  userUid_count: Int_Filter
+  """
   ✨ Generated from Field `Assignment`.`dueDate_min` of type `Timestamp`
   """
   dueDate_min: Timestamp_Filter
@@ -224,6 +248,14 @@ input Assignment_Having {
 ✨ Generated key input type for table 'Assignment'. It represents the primary key fields used to uniquely identify a row in the table.
 """
 input Assignment_Key {
+  """
+  ✨ Generated from Field `Assignment`.`userUid` of type `String!`
+  """
+  userUid: String
+  """
+  ✨ `_expr` server value variant of `userUid` (✨ Generated from Field `Assignment`.`userUid` of type `String!`)
+  """
+  userUid_expr: String_Expr @fdc_forbiddenInVariables
   """
   ✨ Generated from Field `Assignment`.`externalId` of type `String!`
   """
@@ -251,9 +283,17 @@ input Assignment_ListFilter {
 """
 input Assignment_Order {
   """
+  ✨ Generated from Field `Assignment`.`userUid` of type `String!`
+  """
+  userUid: OrderDirection
+  """
   ✨ Generated from Field `Assignment`.`externalId` of type `String!`
   """
   externalId: OrderDirection
+  """
+  ✨ Generated from Field `Assignment`.`user` of type `User!`
+  """
+  user: User_Order
   """
   ✨ Generated from Field `Assignment`.`courseName` of type `String!`
   """
@@ -306,6 +346,10 @@ input Assignment_Order {
   ✨ Generated from Field `Assignment`.`url_count` of type `Int!`
   """
   url_count: OrderDirection
+  """
+  ✨ Generated from Field `Assignment`.`userUid_count` of type `Int!`
+  """
+  userUid_count: OrderDirection
   """
   ✨ Generated from Field `Assignment`.`dueDate_min` of type `Timestamp`
   """
@@ -642,6 +686,14 @@ input User_Data {
   """
   uid_expr: String_Expr @fdc_forbiddenInVariables
   """
+  ✨ Generated from Field `User`.`canvasToken` of type `String`
+  """
+  canvasToken: String
+  """
+  ✨ `_expr` server value variant of `canvasToken` (✨ Generated from Field `User`.`canvasToken` of type `String`)
+  """
+  canvasToken_expr: String_Expr @fdc_forbiddenInVariables
+  """
   ✨ Generated from Field `User`.`courseConfigs` of type `String`
   """
   courseConfigs: String
@@ -657,6 +709,18 @@ input User_Data {
   ✨ `_expr` server value variant of `email` (✨ Generated from Field `User`.`email` of type `String!`)
   """
   email_expr: String_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `User`.`prairieLearnToken` of type `String`
+  """
+  prairieLearnToken: String
+  """
+  ✨ `_expr` server value variant of `prairieLearnToken` (✨ Generated from Field `User`.`prairieLearnToken` of type `String`)
+  """
+  prairieLearnToken_expr: String_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `User`.`assignments_on_user` of type `[Assignment!]!`
+  """
+  assignments_on_user: [Assignment_Data!]
   """
   ✨ Generated from Field `User`.`enrollments_on_user` of type `[Enrollment!]!`
   """
@@ -687,6 +751,10 @@ input User_Filter {
   """
   uid: String_Filter
   """
+  ✨ Generated from Field `User`.`canvasToken` of type `String`
+  """
+  canvasToken: String_Filter
+  """
   ✨ Generated from Field `User`.`courseConfigs` of type `String`
   """
   courseConfigs: String_Filter
@@ -694,6 +762,14 @@ input User_Filter {
   ✨ Generated from Field `User`.`email` of type `String!`
   """
   email: String_Filter
+  """
+  ✨ Generated from Field `User`.`prairieLearnToken` of type `String`
+  """
+  prairieLearnToken: String_Filter
+  """
+  ✨ Generated from Field `User`.`assignments_on_user` of type `[Assignment!]!`
+  """
+  assignments_on_user: Assignment_ListFilter
   """
   ✨ Generated from Field `User`.`enrollments_on_user` of type `[Enrollment!]!`
   """
@@ -749,6 +825,10 @@ input User_Having {
   """
   _count: Int_Filter
   """
+  ✨ Generated from Field `User`.`canvasToken_count` of type `Int!`
+  """
+  canvasToken_count: Int_Filter
+  """
   ✨ Generated from Field `User`.`courseConfigs_count` of type `Int!`
   """
   courseConfigs_count: Int_Filter
@@ -756,6 +836,10 @@ input User_Having {
   ✨ Generated from Field `User`.`email_count` of type `Int!`
   """
   email_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`prairieLearnToken_count` of type `Int!`
+  """
+  prairieLearnToken_count: Int_Filter
   """
   ✨ Generated from Field `User`.`uid_count` of type `Int!`
   """
@@ -796,6 +880,10 @@ input User_Order {
   """
   uid: OrderDirection
   """
+  ✨ Generated from Field `User`.`canvasToken` of type `String`
+  """
+  canvasToken: OrderDirection
+  """
   ✨ Generated from Field `User`.`courseConfigs` of type `String`
   """
   courseConfigs: OrderDirection
@@ -804,9 +892,17 @@ input User_Order {
   """
   email: OrderDirection
   """
+  ✨ Generated from Field `User`.`prairieLearnToken` of type `String`
+  """
+  prairieLearnToken: OrderDirection
+  """
   ✨ Generated from Field `User`.`_count` of type `Int!`
   """
   _count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`canvasToken_count` of type `Int!`
+  """
+  canvasToken_count: OrderDirection
   """
   ✨ Generated from Field `User`.`courseConfigs_count` of type `Int!`
   """
@@ -815,6 +911,10 @@ input User_Order {
   ✨ Generated from Field `User`.`email_count` of type `Int!`
   """
   email_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`prairieLearnToken_count` of type `Int!`
+  """
+  prairieLearnToken_count: OrderDirection
   """
   ✨ Generated from Field `User`.`uid_count` of type `Int!`
   """
@@ -832,6 +932,14 @@ input UserAssignment_Data {
   ✨ `_expr` server value variant of `userUid` (✨ Generated from Field `UserAssignment`.`userUid` of type `String!`)
   """
   userUid_expr: String_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `UserAssignment`.`assignmentUserUid` of type `String!`
+  """
+  assignmentUserUid: String
+  """
+  ✨ `_expr` server value variant of `assignmentUserUid` (✨ Generated from Field `UserAssignment`.`assignmentUserUid` of type `String!`)
+  """
+  assignmentUserUid_expr: String_Expr @fdc_forbiddenInVariables
   """
   ✨ Generated from Field `UserAssignment`.`assignmentExternalId` of type `String!`
   """
@@ -885,6 +993,10 @@ input UserAssignment_Filter {
   ✨ Generated from Field `UserAssignment`.`userUid` of type `String!`
   """
   userUid: String_Filter
+  """
+  ✨ Generated from Field `UserAssignment`.`assignmentUserUid` of type `String!`
+  """
+  assignmentUserUid: String_Filter
   """
   ✨ Generated from Field `UserAssignment`.`assignmentExternalId` of type `String!`
   """
@@ -948,6 +1060,10 @@ input UserAssignment_Having {
   """
   assignmentExternalId_count: Int_Filter
   """
+  ✨ Generated from Field `UserAssignment`.`assignmentUserUid_count` of type `Int!`
+  """
+  assignmentUserUid_count: Int_Filter
+  """
   ✨ Generated from Field `UserAssignment`.`score_count` of type `Int!`
   """
   score_count: Int_Filter
@@ -972,6 +1088,14 @@ input UserAssignment_Key {
   ✨ `_expr` server value variant of `userUid` (✨ Generated from Field `UserAssignment`.`userUid` of type `String!`)
   """
   userUid_expr: String_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `UserAssignment`.`assignmentUserUid` of type `String!`
+  """
+  assignmentUserUid: String
+  """
+  ✨ `_expr` server value variant of `assignmentUserUid` (✨ Generated from Field `UserAssignment`.`assignmentUserUid` of type `String!`)
+  """
+  assignmentUserUid_expr: String_Expr @fdc_forbiddenInVariables
   """
   ✨ Generated from Field `UserAssignment`.`assignmentExternalId` of type `String!`
   """
@@ -1003,6 +1127,10 @@ input UserAssignment_Order {
   """
   userUid: OrderDirection
   """
+  ✨ Generated from Field `UserAssignment`.`assignmentUserUid` of type `String!`
+  """
+  assignmentUserUid: OrderDirection
+  """
   ✨ Generated from Field `UserAssignment`.`assignmentExternalId` of type `String!`
   """
   assignmentExternalId: OrderDirection
@@ -1030,6 +1158,10 @@ input UserAssignment_Order {
   ✨ Generated from Field `UserAssignment`.`assignmentExternalId_count` of type `Int!`
   """
   assignmentExternalId_count: OrderDirection
+  """
+  ✨ Generated from Field `UserAssignment`.`assignmentUserUid_count` of type `Int!`
+  """
+  assignmentUserUid_count: OrderDirection
   """
   ✨ Generated from Field `UserAssignment`.`score_count` of type `Int!`
   """
