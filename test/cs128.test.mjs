@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { parseGradebook, parseDueDate, fetchCs128, GRADEBOOK_URL } from "../lib/sources/cs128.mjs";
+import { parseGradebook, parseDueDate, fetchCs128, GRADEBOOK_URL, GRADEBOOK_TABLE_SELECTOR } from "../lib/sources/cs128.mjs";
+import { JSDOM } from "jsdom";
 
 const load = (f) => readFileSync(new URL(`./fixtures/${f}`, import.meta.url), "utf8");
 const now = new Date("2026-09-03T12:00:00Z");
@@ -45,7 +46,8 @@ test("fetchCs128 reads the gradebook only, waiting for its table", async () => {
   };
   const out = await fetchCs128({ course: "CS 128" }, { browser, now });
   assert.equal(out.length, 9);
-  assert.deepEqual(visited, [GRADEBOOK_URL, "table .fw-semibold"], "one page: the gradebook, waiting for its table itself rather than any table");
+  assert.deepEqual(visited, [GRADEBOOK_URL, GRADEBOOK_TABLE_SELECTOR], "one page: the gradebook, waiting for its table itself rather than any table");
+  assert.ok(new JSDOM(load("cs128-my-gradebook.html")).window.document.querySelector(GRADEBOOK_TABLE_SELECTOR), "selector matches lessons table in fixture");
   assert.ok(out.every((a) => a.id.startsWith("cs128:lesson:")), "no calendar events");
 });
 

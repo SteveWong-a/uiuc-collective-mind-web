@@ -13,6 +13,7 @@
   "scripts": {
     "dev": "tsc && electron .",
     "build": "tsc && node copy-dist.mjs",
+    "test": "npm run build && electron --headless test-electron.mjs",
     "build:mac": "npm run build && electron-builder --mac",
     "build:win": "npm run build && electron-builder --win",
     "build:all": "npm run build && electron-builder --mac --win",

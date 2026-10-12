@@ -311,7 +311,7 @@ test("hide overdue toggle removes overdue work from upcoming", () => {
   const window = mount(baseState({
     assignments: [
       item({ id: "1", title: "Past Due Work", dueAt: "2026-09-01T17:00:00.000Z", status: "open", details: "Score: 0.0/100.0" }),
-      item({ id: "2", title: "Future Work", dueAt: "2026-09-20T17:00:00.000Z", status: "open" }),
+      item({ id: "2", title: "Future Work", dueAt: new Date(Date.now() + 10 * 86400000).toISOString(), status: "open" }),
     ]
   }));
   try {

@@ -28,6 +28,9 @@ export class ElectronBrowser {
   private _queue: Promise<any> = Promise.resolve();
   private _loginPage: BrowserWindow | null = null;
   private _session: Electron.Session | null = null;
+  private _loginTargetHost: string | null = null;
+  private _hasSeenLoginPrompt = false;
+  private _saveCookieTimer: any = null;
 
   constructor({ profileDir, log = () => {}, cookieFile = null, ssoWaitMs = 15_000, ssoPollMs = 500 }: any) {
     this.profileDir = profileDir;
@@ -43,7 +46,18 @@ export class ElectronBrowser {
     if (this._session) return this._session;
     this._session = session.fromPartition('persist:scraper');
     await this._restoreCookies();
+    this._session.cookies.on('changed', () => {
+      this._debouncedSaveCookies();
+    });
     return this._session;
+  }
+
+  private _debouncedSaveCookies() {
+    if (this._saveCookieTimer) clearTimeout(this._saveCookieTimer);
+    this._saveCookieTimer = setTimeout(() => {
+      this._saveCookies().catch(() => {});
+      this._saveCookieTimer = null;
+    }, 500);
   }
 
   private async _restoreCookies() {
@@ -235,6 +249,30 @@ export class ElectronBrowser {
 
         const result = await fn(pageShim);
         await this._saveCookies();
+
+        // If a pull succeeded through the session and a login window is open for this host,
+        // close the login window since login has been verified by the pull.
+        if (this._loginPage && !this._loginPage.isDestroyed()) {
+          try {
+            const currentLoginUrl = this._loginPage.webContents.getURL();
+            const loginHost = hostOf(currentLoginUrl);
+            const pullHost = hostOf(url);
+            if (loginHost === pullHost || this._loginTargetHost === pullHost) {
+              const onAuthScreen = isLoginUrl(currentLoginUrl) || 
+                currentLoginUrl.includes("shibboleth") || 
+                currentLoginUrl.includes("login.microsoftonline.com") ||
+                currentLoginUrl.includes("login.illinois.edu");
+              if (!onAuthScreen) {
+                this.log(`Pull succeeded for ${pullHost}, closing login window.`);
+                this._loginPage.close();
+                this._loginPage = null;
+                this._headed = false;
+                this._loginTargetHost = null;
+              }
+            }
+          } catch { /* ignore */ }
+        }
+
         return result;
       } finally {
         if (!win.isDestroyed()) {
@@ -246,8 +284,16 @@ export class ElectronBrowser {
 
   async openForLogin(url: string) {
     const sess = await this._ensureSession();
+    const targetHost = hostOf(url);
+    this._loginTargetHost = targetHost;
+    this._hasSeenLoginPrompt = false;
+
+    // If an active login window is already open, focus it and navigate to the requested URL
     if (this._loginPage && !this._loginPage.isDestroyed()) {
-      this._loginPage.close();
+      if (this._loginPage.isMinimized()) this._loginPage.restore();
+      this._loginPage.focus();
+      this._loginPage.loadURL(url).catch((err: any) => this.log(`Login window nav error: ${err.message}`));
+      return;
     }
 
     // Clear any stale .smartphysics2 cookies that cause the redirect loop
@@ -274,19 +320,26 @@ export class ElectronBrowser {
     
     this._loginPage = win;
     this._headed = true;
+
+    // Prevent popups or target="_blank" from escaping the Electron login window
+    win.webContents.setWindowOpenHandler(({ url: newUrl }) => {
+      win.loadURL(newUrl).catch(() => {});
+      return { action: 'deny' };
+    });
     
     win.on("closed", async () => {
       await this._saveCookies();
       if (this._loginPage === win) {
         this._loginPage = null;
         this._headed = false;
+        this._loginTargetHost = null;
+        this._hasSeenLoginPrompt = false;
       }
     });
 
-    // Detect redirect loops and monitor successful login
+    // Detect redirect loops and monitor authentication screens
     let loopNavCount = 0;
     let lastNavTime = Date.now();
-    const targetHost = hostOf(url);
 
     win.webContents.on("did-navigate", async (event, navUrl) => {
       const now = Date.now();
@@ -311,36 +364,56 @@ export class ElectronBrowser {
       }
       lastNavTime = now;
 
-      // Check if we reached the target authenticated page
-      if (targetHost && hostOf(navUrl) === targetHost && !isLoginUrl(navUrl) && !navUrl.includes("login.aspx")) {
-        const hasPassword = await win.webContents.executeJavaScript(`!!document.querySelector('input[type="password"]')`).catch(() => false);
-        const hasSsoForm = await win.webContents.executeJavaScript(`!!document.querySelector('form[action*="lassso"], form[action*="shibboleth"]')`).catch(() => false);
+      // Mark that user reached an authentication screen
+      if (isLoginUrl(navUrl) || 
+          navUrl.includes("shibboleth") || 
+          navUrl.includes("login.microsoftonline.com") || 
+          navUrl.includes("login.illinois.edu") || 
+          navUrl.includes("lassso") || 
+          navUrl.includes("/login") || 
+          navUrl.includes("/logon") || 
+          navUrl.includes("/saml")) {
+        this._hasSeenLoginPrompt = true;
+      }
+
+      await this._saveCookies();
+    });
+
+    // Check if login completed after page has actually loaded
+    win.webContents.on("did-finish-load", async () => {
+      if (win.isDestroyed()) return;
+      const currentUrl = win.webContents.getURL();
+      
+      const hasPassword = await win.webContents.executeJavaScript(`!!document.querySelector('input[type="password"]')`).catch(() => false);
+      const hasSsoForm = await win.webContents.executeJavaScript(`!!document.querySelector('form[action*="lassso"], form[action*="shibboleth"]')`).catch(() => false);
+
+      if (hasPassword || hasSsoForm || isLoginUrl(currentUrl)) {
+        this._hasSeenLoginPrompt = true;
+        return;
+      }
+
+      // Check if user reached the target authenticated page AFTER having been on a login page
+      if (this._hasSeenLoginPrompt && targetHost && hostOf(currentUrl) === targetHost && !isLoginUrl(currentUrl) && !currentUrl.includes("login.aspx")) {
         if (!hasPassword && !hasSsoForm) {
-          this.log(`Login confirmed (${navUrl}), saving cookies and closing window.`);
+          this.log(`Login confirmed (${currentUrl}), saving cookies.`);
           await this._saveCookies();
-          if (!win.isDestroyed()) {
-            win.close();
-          }
+          setTimeout(() => {
+            if (!win.isDestroyed()) {
+              this.log(`Closing login window after confirmed login to ${targetHost}`);
+              win.close();
+            }
+          }, 1500);
         }
       }
     });
     
     try {
       await win.loadURL(url);
-      // Wait for SSO redirect to settle if already authenticated
-      await this._settleLogin(win, url);
-      
-      this.log("Login confirmed, saving cookies and closing window.");
-      await this._saveCookies();
       if (!win.isDestroyed()) {
-        win.close();
+        win.focus();
       }
     } catch (err: any) {
-      if (err.name === "LoginRequiredError") {
-        this.log(`User login required in window: ${err.message}`);
-      } else {
-        this.log(`Login window error: ${err.message}`);
-      }
+      this.log(`Login window load error: ${err.message}`);
     }
   }
 
