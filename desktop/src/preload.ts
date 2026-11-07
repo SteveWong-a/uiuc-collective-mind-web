@@ -6,5 +6,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   triggerPoll: () => ipcRenderer.invoke('trigger-poll'),
   openLogin: (sourceKey: string) => ipcRenderer.invoke('open-login', sourceKey),
-  getAppVersion: () => ipcRenderer.invoke('get-app-version')
+  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  getMuseRundown: () => ipcRenderer.invoke('get-muse-rundown')
 });

@@ -31,6 +31,7 @@ export async function initServer(onStateChange: (state: any) => void) {
   const { runSync } = await nativeImport(libPath('google/sync.mjs'));
   const { CalendarApi } = await nativeImport(libPath('google/calendar.mjs'));
   const { runBlockSync } = await nativeImport(libPath('google/blocks.mjs'));
+  const { MuseMcpServer, autoRegisterMuseMcp, syncMuseRundownFile } = await nativeImport(libPath('muse.mjs'));
   
   // The server module is at the root
   const serverModPath = pathToFileURL(path.join(rootPath, 'server.mjs')).href;
@@ -74,8 +75,13 @@ export async function initServer(onStateChange: (state: any) => void) {
     prairietest: (cfg: any, deps: any) => fetchPrairieTest(cfg, deps),
   };
 
+  let mcp: any = null;
   const poller = new Poller({
-    afterRun: () => browser.releaseIdle(),
+    afterRun: async () => {
+      syncMuseRundownFile({ store, settings: getSettings(), dataDir, log });
+      if (mcp) mcp.notifyUpdate();
+      await browser.releaseIdle();
+    },
     store,
     getSettings,
     fetchers,
@@ -101,6 +107,18 @@ export async function initServer(onStateChange: (state: any) => void) {
     bus
   });
 
+  mcp = new MuseMcpServer({
+    store,
+    getSettings,
+    poller,
+    onReplanBlocks: async ({ withinHours, startHour, endHour }: any) => {
+      if (!auth.connected) return { synced: false, reason: "Google Calendar not connected" };
+      const res = await runBlockSync({ api: calendar, store, assignments: store.state.assignments, withinHours, startHour, endHour, log });
+      return { synced: true, ...res };
+    },
+    log,
+  });
+
   const apiToken = loadOrCreateApiToken(path.join(dataDir, "api-token"));
 
   const publicDir = isProd ? path.join(rootPath, 'public') : path.join(__dirname, '../../public');
@@ -116,6 +134,7 @@ export async function initServer(onStateChange: (state: any) => void) {
     recentLog, 
     publicDir,
     apiToken,
+    mcp,
   });
 
   // Proxy state events to Electron main process
@@ -135,6 +154,8 @@ export async function initServer(onStateChange: (state: any) => void) {
       const actualPort = (server.address() as any).port;
       const url = `http://127.0.0.1:${actualPort}`;
       log(`listening on ${url}`);
+      autoRegisterMuseMcp({ rootDir: rootPath, dataDir, settingsFile, port: actualPort, apiToken, log });
+      syncMuseRundownFile({ store, settings: getSettings(), dataDir, log });
       poller.start();
       
       resolve({
@@ -144,6 +165,7 @@ export async function initServer(onStateChange: (state: any) => void) {
         poller,
         browser,
         server,
+        mcp,
         shutdown: async () => {
           poller.stop();
           await browser.close();

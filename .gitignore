@@ -8,3 +8,4 @@ settings.json
 .playwright-mcp/
 .superpowers/
 logs/
+.mcp.json

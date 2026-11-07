@@ -159,6 +159,76 @@ events it made itself — anything you put on that calendar by hand is left
 alone. Blocks are re-planned on every poll: finish the work and the event
 disappears.
 
+## Muse AI & Model Context Protocol (MCP) Integration
+
+UIUC Collective Mind includes a built-in [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server (`scripts/mcp-server.mjs` and HTTP/SSE on `/mcp`). It connects your live UIUC assignment progress, grade trends, credit windows, and study blocks directly to **Muse** (or Claude Desktop, Cursor, etc.).
+
+### 1. Automatic Connection (Zero-Config)
+
+Whenever the server runs (`bash scripts/install-launchagent.sh` or `npm start`), it automatically registers the MCP server configuration with secure `0600` file permissions into:
+- `~/Library/Application Support/Muse/mcp.json` (macOS Muse configuration directory, if present)
+- `.mcp.json` (repository root for workspace MCP clients)
+- `data/mcp-config.json`
+- `~/.cursor/mcp.json` and Claude Desktop configs (if directories exist)
+
+If Muse is already installed on your Mac, simply start the server and restart or reload Muse.
+
+### 2. Manual Connection in Muse (Stdio Transport)
+
+If you configure Muse manually, add the following to your Muse MCP config (`~/Library/Application Support/Muse/mcp.json` or Muse app Settings → MCP):
+
+```json
+{
+  "mcpServers": {
+    "uiuc-collective-mind": {
+      "command": "node",
+      "args": [
+        "/ABSOLUTE/PATH/TO/uiuc-collective-mind-web/scripts/mcp-server.mjs"
+      ],
+      "env": {
+        "UCM_DATA_DIR": "/ABSOLUTE/PATH/TO/uiuc-collective-mind-web/data",
+        "UCM_SERVER_URL": "http://127.0.0.1:4258",
+        "UCM_API_TOKEN": "<YOUR_API_TOKEN>"
+      }
+    }
+  }
+}
+```
+
+> **Note**: Replace `/ABSOLUTE/PATH/TO/uiuc-collective-mind-web` with the real path to your cloned repository.
+> Your API token is in `data/api-token` (or in the browser URL printed by `bash scripts/open-ui.sh`).
+
+### 3. HTTP / SSE Transport
+
+When the local server is running on port 4258, you can also connect via HTTP / Server-Sent Events (SSE):
+
+- **Endpoint**: `http://127.0.0.1:4258/mcp?t=<YOUR_API_TOKEN>`
+- **Header Auth**: Alternatively send `x-mcp-token: <YOUR_API_TOKEN>` or `Authorization: Bearer <YOUR_API_TOKEN>`.
+- **Live Notifications**: The server automatically pushes SSE `notifications/resources/updated` to connected Muse clients whenever assignment progress, grades, or evening blocks change.
+
+### 4. Direct Offline Snapshot (`data/muse-rundown.json`)
+
+On every poll, the server writes an offline-ready JSON snapshot to `data/muse-rundown.json` (`0600` permissions). Muse agents can read this file directly for instant context without spawning a process or hitting an HTTP endpoint.
+
+### 5. Available MCP Capabilities for Muse
+
+**Tools**:
+- `get_homework_rundown`: Returns current assignments, completion percentages, overdue items needing schedule pivots, course grade trends, and scheduled homework blocks.
+- `get_assignment_progress`: Detailed completion progress (0–100%), remaining estimated minutes, and credit windows (e.g., PrairieLearn late-credit tiers).
+- `get_missed_assignments_and_pivot_plan`: Detects overdue assignments still submittable for credit and builds an automatic schedule pivot for tonight's homework block.
+- `get_course_grades_and_feedback_context`: Course grade histories, performance trends, weak topics, and structuring feedback for study blocks.
+- `replan_homework_blocks`: Dynamically recalculates evening study blocks weighted by assignment progress and grade history; optionally syncs directly to Google Calendar.
+- `refresh_assignments`: Triggers an immediate live pull across all LMS sources (Canvas, PrairieLearn, cs128, smartPhysics, PrairieTest).
+
+**Resources**:
+- `muse://homework/rundown` — Full homework and progress snapshot
+- `muse://homework/missed-pivot` — Missed work and dynamic schedule pivot plan
+- `muse://homework/grades-feedback` — Course grade history and study recommendations
+- `muse://homework/schedule-blocks` — Nightly block allocations with per-assignment minutes
+
+**Prompts**:
+- `muse_homework_pivot_and_feedback` — Interactive briefing prompt for Muse to assess workload, identify high-leverage assignments, and pivot your evening schedule.
+
 ## How it works
 
 - Every `pollMinutes` (default 30) the server fetches all sources. A failing

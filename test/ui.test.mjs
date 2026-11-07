@@ -325,3 +325,22 @@ test("hide overdue toggle removes overdue work from upcoming", () => {
     assert.ok(!window.document.querySelector("#upcoming .flag"), "no overdue flags remaining");
   } finally { window.close(); }
 });
+
+test("Muse AI MCP status and sidebar panel render automatic connection and pivot state", () => {
+  const window = mount(baseState({
+    mcp: {
+      enabled: true,
+      serverName: "uiuc-collective-mind-muse",
+      summary: { activeCount: 3, inProgressCount: 1, missedOpenCount: 1, needsPivot: true },
+    },
+  }));
+  try {
+    const headerStatus = window.document.querySelector("#mcpstatus");
+    const panel = window.document.querySelector("#muse-panel");
+    assert.ok(headerStatus);
+    assert.ok(panel);
+    assert.match(headerStatus.textContent, /Muse MCP · Pivot active \(1 missed, 1 in progress\)/);
+    assert.match(panel.textContent, /StatusPivot active/);
+    assert.match(panel.textContent, /3 active · 1 in progress · 1 missed/);
+  } finally { window.close(); }
+});

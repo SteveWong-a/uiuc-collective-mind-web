@@ -141,6 +141,13 @@ ipcMain.handle('get-app-version', () => {
   return app.getVersion();
 });
 
+ipcMain.handle('get-muse-rundown', async () => {
+  if (appServices && appServices.mcp) {
+    return appServices.mcp.getRundown();
+  }
+  return null;
+});
+
 // Quit when all windows are closed, except on macOS (tray mode)
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

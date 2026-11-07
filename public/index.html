@@ -170,6 +170,7 @@
   <span class="poll" id="pollinfo">Connecting…</span>
   <span class="spacer"></span>
   <div class="actions">
+    <span id="mcpstatus" style="color: var(--muted); font-size: 13px;"></span>
     <span id="gstatus"></span>
     <button id="gbtn" class="ghost">Connect Google</button>
     <button id="pull">Pull now</button>
@@ -196,6 +197,7 @@
   <aside id="content-aside" style="display: none;">
     <section><h2>Exams to reserve</h2><div id="reservable"></div></section>
     <section><h2>Sources</h2><div id="sources"></div></section>
+    <section><h2>Muse AI MCP</h2><div id="muse-panel"></div></section>
     <section>
       <details class="aside-dropdown">
         <summary><h2>Past Assignments</h2></summary>
@@ -468,6 +470,25 @@ function render() {
   }
   $("#gstatus").textContent = gstatus.join(" · ");
   $("#gbtn").textContent = state.google.connected ? "Disconnect Google" : "Connect Google";
+  const mcpEl = $("#mcpstatus");
+  if (mcpEl) {
+    const ms = state.mcp?.summary;
+    mcpEl.textContent = ms
+      ? ms.needsPivot
+        ? `Muse MCP · Pivot active (${ms.missedOpenCount} missed, ${ms.inProgressCount} in progress)`
+        : `Muse MCP · ${ms.activeCount} active`
+      : "Muse MCP ready";
+  }
+  const musePanel = $("#muse-panel");
+  if (musePanel) {
+    const ms = state.mcp?.summary;
+    if (ms) {
+      musePanel.innerHTML = `<div class="src" style="border-top: 1.5px solid var(--ink);"><span>Status</span><span class="st">${ms.needsPivot ? "Pivot active" : "Auto-connected"}</span></div>` +
+        `<div class="src"><span>Assignments</span><span class="st">${ms.activeCount} active · ${ms.inProgressCount} in progress · ${ms.missedOpenCount} missed</span></div>`;
+    } else {
+      musePanel.innerHTML = `<div class="src" style="border-top: 1.5px solid var(--ink);"><span>Status</span><span class="st">Auto-connected</span></div>`;
+    }
+  }
   renderLog();
 }
 function renderLog() { if (!state) return; $("#log").textContent = state.log.slice(-80).map((l) => `${l.at.slice(11, 19)}  ${l.msg}`).join("\n"); $("#log").scrollTop = 1e9; }

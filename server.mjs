@@ -20,6 +20,7 @@ import { TasksApi } from "./lib/google/tasks.mjs";
 import { runSync } from "./lib/google/sync.mjs";
 import { CalendarApi } from "./lib/google/calendar.mjs";
 import { runBlockSync } from "./lib/google/blocks.mjs";
+import { MuseMcpServer, autoRegisterMuseMcp, syncMuseRundownFile } from "./lib/muse.mjs";
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 
@@ -64,14 +65,19 @@ export function sourceUrl(cfg, settings = {}) {
   return null;
 }
 
-export function createServer({ store, settingsFile, poller, browser, google, bus, log, recentLog, publicDir, apiToken }) {
+export function createServer({ store, settingsFile, poller, browser, google, bus, log, recentLog, publicDir, apiToken, mcp = null }) {
   if (!apiToken || typeof apiToken !== "string") throw new Error("apiToken is required");
   const settings = () => loadSettings(settingsFile);
+  const mcpServer = mcp ?? new MuseMcpServer({ store, getSettings: settings, poller, log });
+  if (bus && typeof bus.on === "function") {
+    bus.on("state", () => mcpServer.notifyUpdate());
+  }
   let returnTo = "/";
   const statePayload = () => ({
     assignments: store.state.assignments, changes: store.state.changes, sources: store.state.sources,
     lastPoll: store.state.lastPoll, nextPoll: poller.nextAt, polling: poller.running,
     google: { connected: google.auth.connected, tasklistId: store.state.google.tasklistId, calendarId: store.state.google.calendarId },
+    mcp: mcpServer.status(),
     settings: maskSettings(settings()), log: recentLog(),
   });
 
@@ -104,11 +110,20 @@ export function createServer({ store, settingsFile, poller, browser, google, bus
         res.writeHead(200, headers);
         return res.end(html);
       }
+      if (path === "/mcp" || path === "/api/mcp") {
+        if (isBrowserLikeMissingOrigin(req)) return json(res, 403, { error: "forbidden origin" });
+        const headerOrQueryToken = url.searchParams.get("t") ?? req.headers["x-mcp-token"] ?? "";
+        if (!hasValidApiToken(req, apiToken) && !tokensEqual(String(headerOrQueryToken), apiToken)) {
+          return json(res, 401, { error: "unauthorized" });
+        }
+        return await mcpServer.handleHttpRequest(req, res, readBody);
+      }
       if (path.startsWith("/api/")) {
         if (isBrowserLikeMissingOrigin(req)) return json(res, 403, { error: "forbidden origin" });
         if (!hasValidApiToken(req, apiToken)) return json(res, 401, { error: "unauthorized" });
       }
       if (m === "GET" && path === "/api/state") return json(res, 200, statePayload());
+      if (m === "GET" && path === "/api/muse/rundown") return json(res, 200, mcpServer.getRundown());
       if (m === "GET" && path === "/api/events") {
         res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-store", connection: "keep-alive" });
         const send = (event, data) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
@@ -202,8 +217,14 @@ export async function main() {
     smartphysics: (cfg, deps) => fetchSmartPhysics(cfg, deps),
     prairietest: (cfg, deps) => fetchPrairieTest(cfg, deps),
   };
+  const dataDir = join(ROOT, "data");
+  let mcp = null;
   const poller = new Poller({
-    afterRun: () => browser.releaseIdle(),
+    afterRun: async () => {
+      syncMuseRundownFile({ store, settings: getSettings(), dataDir, log: realLog });
+      if (mcp) mcp.notifyUpdate();
+      await browser.releaseIdle();
+    },
     store,
     getSettings,
     fetchers,
@@ -232,13 +253,26 @@ export async function main() {
     log: realLog,
     bus: realBus,
   });
-  const apiToken = loadOrCreateApiToken(join(ROOT, "data", "api-token"));
-  const server = createServer({ store, settingsFile, poller, browser, google: { auth }, bus: realBus, log: realLog, recentLog: realRecent, publicDir: join(ROOT, "public"), apiToken });
+  mcp = new MuseMcpServer({
+    store,
+    getSettings,
+    poller,
+    onReplanBlocks: async ({ withinHours, startHour, endHour }) => {
+      if (!auth.connected) return { synced: false, reason: "Google Calendar not connected" };
+      const res = await runBlockSync({ api: calendar, store, assignments: store.state.assignments, withinHours, startHour, endHour, log: realLog });
+      return { synced: true, ...res };
+    },
+    log: realLog,
+  });
+  const apiToken = loadOrCreateApiToken(join(dataDir, "api-token"));
+  const server = createServer({ store, settingsFile, poller, browser, google: { auth }, bus: realBus, log: realLog, recentLog: realRecent, publicDir: join(ROOT, "public"), apiToken, mcp });
   const port = getSettings().port;
   server.on("error", (e) => { if (e.code === "EADDRINUSE") { console.error(`\nPort ${port} in use. Set a different "port" in settings.json.\n`); process.exit(1); } throw e; });
   server.listen(port, "127.0.0.1", () => {
     const host = getSettings().appHost;
     realLog(`listening on http://${host}:${port}`);
+    autoRegisterMuseMcp({ rootDir: ROOT, dataDir, settingsFile, port, apiToken, log: realLog });
+    syncMuseRundownFile({ store, settings: getSettings(), dataDir, log: realLog });
     if (!process.env.UCM_NO_OPEN) openBrowser(`http://${host}:${port}/?t=${apiToken}`);
     poller.start();
   });

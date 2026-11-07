@@ -36,8 +36,9 @@ test("hasValidApiToken accepts Bearer and cookie", () => {
 
 test("isBrowserLikeMissingOrigin", () => {
   assert.equal(isBrowserLikeMissingOrigin({ headers: { "sec-fetch-site": "cross-site" } }), true);
-  assert.equal(isBrowserLikeMissingOrigin({ headers: { "sec-fetch-site": "same-origin" } }), true);
+  assert.equal(isBrowserLikeMissingOrigin({ headers: { "sec-fetch-site": "same-site" } }), true);
   assert.equal(isBrowserLikeMissingOrigin({ headers: { origin: "http://127.0.0.1:4258", "sec-fetch-site": "same-origin" } }), false);
+  assert.equal(isBrowserLikeMissingOrigin({ headers: { "sec-fetch-site": "same-origin" } }), false);
   assert.equal(isBrowserLikeMissingOrigin({ headers: { "sec-fetch-site": "none" } }), false);
   assert.equal(isBrowserLikeMissingOrigin({ headers: {} }), false);
 });
